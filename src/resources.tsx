@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Button, Container, Row, Table, Col} from 'react-bootstrap';
 
 interface Resource {
-    adb_port: number;
-    available: string;
-    name: string;
-    status: string;
-    version: string;
-    vnc_port: number;
-  }
+  adb_port: number;
+  available: string;
+  name: string;
+  status: string;
+  version: string;
+  vnc_port: number;
+}
 
 interface ResourcePageProps {
   resources: Resource[];
@@ -18,70 +19,104 @@ interface ResourcePageProps {
   nickName: string;
   resetNickname: () => void;
   handleCreateNew: () => void;
+  checkResourceStatus: (name: string) => Promise<string | null>;
+  updateResourceStatus: (name: string, status: string) => void;
 }
 
-const ResourcePage: React.FC<ResourcePageProps> = ({ resources, createResource, deleteResource, launchVNC, refreshPage, nickName, resetNickname, handleCreateNew }) => {
+const ResourcePage: React.FC<ResourcePageProps> = ({
+  resources,
+  createResource,
+  deleteResource,
+  launchVNC,
+  refreshPage,
+  nickName,
+  resetNickname,
+  handleCreateNew,
+  checkResourceStatus,
+  updateResourceStatus
+}) => {
+  const [resourceStatuses, setResourceStatuses] = useState<{ [name: string]: boolean }>({});
+
+  useEffect(() => {
+    const savedStatuses = localStorage.getItem('resourceStatuses');
+    if (savedStatuses) {
+      setResourceStatuses(JSON.parse(savedStatuses));
+    }
+
+    const intervalId = setInterval(() => {
+      resources.forEach(async (resource) => {
+        const status = await checkResourceStatus(resource.name);
+        if (status === 'Running') {
+          setResourceStatuses((prevStatuses) => {
+            const updatedStatuses = {
+              ...prevStatuses,
+              [resource.name]: true,
+            };
+            localStorage.setItem('resourceStatuses', JSON.stringify(updatedStatuses));
+            return updatedStatuses;
+          });
+          
+          updateResourceStatus(resource.name, 'Running');
+        }
+      });
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [resources, checkResourceStatus, updateResourceStatus]);
+
   return (
-    
-    <div className="container mt-5">
-        <div className="d-flex justify-content-between align-items-center mb-3">
-            <div>
-            <h1 className="mb-0">List of Resources for {nickName}
-                <button className="btn btn-primary mb-1" onClick={() => resetNickname()}>
-                    Switch
-                </button>
-            </h1>
-            </div>
-            <div>
-            <button className="btn btn-primary me-2" onClick={() => handleCreateNew()}>
-                Create New
-            </button>
-            <button className="btn btn-secondary" onClick={() => refreshPage()}>
-                Refresh
-            </button>
-            </div>
-        </div>
-      <table className="table">
+    <div>
+        <Row>
+          <Col 
+          xs={7}
+          >
+            <h1>Emulator Resources</h1>
+          </Col>
+          <Col
+          md="auto"
+          className="ms-auto">
+            <h1>NickName:  {nickName}</h1>
+          </Col>
+        </Row>
+      <Button onClick={handleCreateNew}>Create New Resource</Button>
+      <Button onClick={resetNickname}>Reset Nickname</Button>
+      <Button onClick={refreshPage}>Refresh</Button>
+      <Table striped bordered hover>
         <thead>
           <tr>
             <th>Name</th>
             <th>Status</th>
             <th>Version</th>
-            <th>ADB Port</th>
             <th>VNC Port</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {resources.map((resource, index) => (
-            <tr key={index}>
+          {resources.map((resource) => (
+            <tr key={resource.name}>
               <td>{resource.name}</td>
               <td>{resource.status}</td>
               <td>{resource.version}</td>
-              <td>{resource.adb_port || '-'}</td>
-              <td>{resource.vnc_port || '-'}</td>
+              <td>{resource.vnc_port}</td>
               <td>
-                <button
-                  className="btn btn-danger me-2"
+                <Button
+                  variant="danger"
                   onClick={() => deleteResource(resource.name, nickName)}
-                  disabled={resource.available === "false" || resource.available === "error"}
                 >
                   Delete
-                </button>
-                {(resource.status === "Running" || resource.status === "Pending") && (
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => resource.vnc_port && launchVNC(resource.vnc_port)}
-                    disabled={typeof resource.vnc_port === 'string' && resource.vnc_port === "-" || resource.available === "false" || resource.available === "error"}
-                  >
-                    Launch VNC
-                  </button>
-                )}
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={() => launchVNC(resource.vnc_port)}
+                  disabled={!resourceStatuses[resource.name]}
+                >
+                  Launch
+                </Button>
               </td>
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
     </div>
   );
 };
