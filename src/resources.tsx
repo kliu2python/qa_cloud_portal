@@ -85,39 +85,49 @@ const ResourcePage: React.FC<ResourcePageProps> = ({
       <Button onClick={resetNickname}>Reset Nickname</Button>
       <Button onClick={refreshPage}>Refresh</Button>
       <Table striped bordered hover>
-        <thead>
+      <thead>
           <tr>
             <th>Name</th>
             <th>Status</th>
             <th>Version</th>
             <th>VNC Port</th>
+            <th>ADB Port</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {resources.map((resource) => (
-            <tr key={resource.name}>
-              <td>{resource.name}</td>
-              <td>{resource.status}</td>
-              <td>{resource.version}</td>
-              <td>{resource.vnc_port}</td>
-              <td>
-                <Button
-                  variant="danger"
-                  onClick={() => deleteResource(resource.name, nickName)}
-                >
-                  Delete
-                </Button>
-                <Button
-                  variant="primary"
-                  onClick={() => launchVNC(resource.vnc_port)}
-                  disabled={!resourceStatuses[resource.name]}
-                >
-                  Launch
-                </Button>
+          {resources.length > 0 ? (
+            resources.map((resource) => (
+              <tr key={resource.name}>
+                <td>{resource.name}</td>
+                <td>{resource.status}</td>
+                <td>{resource.version}</td>
+                <td>{resource.vnc_port}</td>
+                <td>{resource.adb_port}</td>
+                <td>
+                  <Button
+                    variant="danger"
+                    onClick={() => deleteResource(resource.name, nickName)}
+                  >
+                    Delete
+                  </Button>
+                  <Button
+                    variant="primary"
+                    onClick={() => launchVNC(resource.vnc_port)}
+                    disabled={!resourceStatuses[resource.name]}
+                  >
+                    Launch
+                  </Button>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={5} style={{ textAlign: 'center' }}>
+                No resources available.
               </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </Table>
     </div>
