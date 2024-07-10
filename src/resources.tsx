@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Container, Row, Table, Col} from 'react-bootstrap';
+import { Button, Container, Row, Table, Col } from 'react-bootstrap';
 
 interface Resource {
   adb_port: number;
@@ -43,41 +43,44 @@ const ResourcePage: React.FC<ResourcePageProps> = ({
       setResourceStatuses(JSON.parse(savedStatuses));
     }
 
+    const enableLaunchButtons = () => {
+      setResourceStatuses((prevStatuses) => {
+        const updatedStatuses = resources.reduce((acc: { [name: string]: boolean }, resource) => {
+          acc[resource.name] = true;
+          return acc;
+        }, {});
+        localStorage.setItem('resourceStatuses', JSON.stringify(updatedStatuses));
+        return updatedStatuses;
+      });
+    };
+
     const intervalId = setInterval(() => {
       resources.forEach(async (resource) => {
         const status = await checkResourceStatus(resource.name);
-        if (status === 'Running') {
-          setResourceStatuses((prevStatuses) => {
-            const updatedStatuses = {
-              ...prevStatuses,
-              [resource.name]: true,
-            };
-            localStorage.setItem('resourceStatuses', JSON.stringify(updatedStatuses));
-            return updatedStatuses;
-          });
-          
-          updateResourceStatus(resource.name, 'Running');
+        if (status) {
+          updateResourceStatus(resource.name, status);
         }
       });
     }, 5000);
 
-    return () => clearInterval(intervalId);
+    const timeoutId = setTimeout(enableLaunchButtons, 5000);
+
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
   }, [resources, checkResourceStatus, updateResourceStatus]);
 
   return (
     <div>
-        <Row>
-          <Col 
-          xs={7}
-          >
-            <h1>Emulator Resources</h1>
-          </Col>
-          <Col
-          md="auto"
-          className="ms-auto">
-            <h1>NickName:  {nickName}</h1>
-          </Col>
-        </Row>
+      <Row>
+        <Col xs={7}>
+          <h1>Emulator Resources</h1>
+        </Col>
+        <Col md="auto" className="ms-auto">
+          <h1>NickName: {nickName}</h1>
+        </Col>
+      </Row>
       <Button onClick={handleCreateNew}>Create New Resource</Button>
       <Button onClick={resetNickname}>Reset Nickname</Button>
       <Button onClick={refreshPage}>Refresh</Button>

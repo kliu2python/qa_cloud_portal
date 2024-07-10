@@ -131,7 +131,7 @@ const App: React.FC = () => {
 
   const checkResourceStatus = async (name: string) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8309/dhub/emulator/check/${name}`, {
+      const response = await fetch(`http://10.160.83.213:8309/dhub/emulator/check/${name}`, {
         method: 'GET'
       });
       if (!response.ok) {
