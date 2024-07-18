@@ -167,9 +167,22 @@ const App: React.FC = () => {
           handleCreateNew={handleCreateNew}
           checkResourceStatus={checkResourceStatus} // Pass the checkResourceStatus function
           updateResourceStatus={updateResourceStatus} // Pass the updateResourceStatus function
+          handleNicknameSubmit={handleNicknameSubmit}
         />
       ) : (
-        <NickNamePage onSubmit={handleNicknameSubmit} />
+        <ResourcePage
+          resources={resources}
+          createResource={createEmulator}
+          deleteResource={deleteResource}
+          launchVNC={launchVNC}
+          refreshPage={handleRefresh}
+          nickName={""}
+          resetNickname={resetNickname}
+          handleCreateNew={handleCreateNew}
+          checkResourceStatus={checkResourceStatus} // Pass the checkResourceStatus function
+          updateResourceStatus={updateResourceStatus} // Pass the updateResourceStatus function
+          handleNicknameSubmit={handleNicknameSubmit}
+        />
       )}
       <CustomModal
         isOpen={modalIsOpen}

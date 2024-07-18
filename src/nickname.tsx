@@ -23,7 +23,7 @@ const NickNamePage: React.FC<NickNamePageProps> = ({ onSubmit }) => {
           Enter your nickname:
           <input type="text" value={nicknameInput} onChange={handleNicknameChange} />
         </label>
-        <button type="submit">Continue</button>
+        <button type="submit">Login</button>
       </form>
     </div>
   );
