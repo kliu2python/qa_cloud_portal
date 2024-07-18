@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import './CustomModal.css';
 
 interface CustomModalProps {
@@ -29,58 +29,63 @@ const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, onOSSubmit, 
   }
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
+    <Fragment>
+    <div className="overlay">
+      <div className="overlay__background" />
+      <div className="overlay__container">
         {os === null ? (
-          <form onSubmit={handleOSSubmit}>
+          <form onSubmit={handleOSSubmit} className="overlay__form">
             <h2>Select OS</h2>
-            <label>
+            <label className="overlay__label">
               <input
                 type="radio"
                 name="os"
                 value="android"
+                className="overlay__input"
               />
               Android
             </label>
-            <label>
+            <label className="overlay__label">
               <input
                 type="radio"
                 name="os"
                 value="ios"
+                className="overlay__input"
               />
               iOS
             </label>
             <div className="modal-buttons">
-              <button type="submit">Next</button>
-              <button type="button" onClick={onClose}>Cancel</button>
+              <button type="submit" className="overlay__button">Next</button>
+              <button type="button" onClick={onClose} className="overlay__button overlay__button--cancel">Cancel</button>
             </div>
           </form>
         ) : os === 'android' ? (
-          <form onSubmit={handleVersionSubmit}>
+          <form onSubmit={handleVersionSubmit} className="overlay__form">
             <h2>Select Android Version</h2>
-            <label>
-              <select value={version} onChange={(e) => setVersion(e.target.value)}>
+            <label className="overlay__label">
+              <select value={version} onChange={(e) => setVersion(e.target.value)} className="overlay__select">
                 {Array.from({ length: 14 - 7 + 1 }, (_, i) => i + 7).map((v) => (
                   <option key={v} value={v}>{`Android ${v}`}</option>
                 ))}
               </select>
             </label>
             <div className="modal-buttons">
-              <button type="submit">Create</button>
-              <button type="button" onClick={onClose}>Cancel</button>
+              <button type="submit" className="overlay__button">Create</button>
+              <button type="button" onClick={onClose} className="overlay__button overlay__button--cancel">Cancel</button>
             </div>
           </form>
         ) : (
-          <div>
+          <div className="overlay__form">
             <h2>iOS Emulator</h2>
             <p>iOS emulator cloud is pending to be ready for use.</p>
             <div className="modal-buttons">
-              <button type="button" onClick={onClose}>Close</button>
+              <button type="button" onClick={onClose} className="overlay__button">Close</button>
             </div>
           </div>
         )}
       </div>
     </div>
+  </Fragment>
   );
 };
 
