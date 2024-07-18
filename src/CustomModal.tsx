@@ -64,7 +64,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ isOpen, onClose, onOSSubmit, 
             <h2>Select Android Version</h2>
             <label className="overlay__label">
               <select value={version} onChange={(e) => setVersion(e.target.value)} className="overlay__select">
-                {Array.from({ length: 14 - 7 + 1 }, (_, i) => i + 7).map((v) => (
+                {Array.from({ length: 15 - 7 + 1 }, (_, i) => i + 7).map((v) => (
                   <option key={v} value={v}>{`Android ${v}`}</option>
                 ))}
               </select>

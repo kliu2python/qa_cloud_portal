@@ -105,7 +105,7 @@ const ResourcePage: React.FC<ResourcePageProps> = ({
           <Button onClick={refreshPage}>Refresh</Button>
         </Col>
         <Col>
-          <Button onClick={launchNFS}>NFA Location</Button>
+          <Button onClick={launchNFS}>NFS Location</Button>
         </Col>
         <Col md="auto" className="ms-auto">
           {nickName ? (
