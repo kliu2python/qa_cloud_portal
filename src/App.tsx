@@ -13,6 +13,8 @@ interface Resource {
   vnc_port: number;
 }
 
+const BASE_SERVER_URL = process.env.DHUB_SERVER_URL || "http://localhost:8309";
+
 const App: React.FC = () => {
   const [nickname, setNickname] = useState<string>('');
   const [resources, setResources] = useState<Resource[]>([]);
@@ -49,7 +51,7 @@ const App: React.FC = () => {
   const fetchResources = async (nickname: string) => {
     setLoading(true); // Show loading modal
     try {
-      const response = await fetch(`http://10.160.83.213:8309/dhub/emulator/list/${nickname}`, {
+      const response = await fetch(`${BASE_SERVER_URL}/dhub/emulator/list/${nickname}`, {
         method: 'GET'
       });
       if (!response.ok) {
@@ -72,7 +74,7 @@ const App: React.FC = () => {
   const createEmulator = async (os: string, version: string) => {
     setLoading(true); // Show loading modal
     try {
-      const response = await fetch('http://10.160.83.213:8309/dhub/emulator/create', {
+      const response = await fetch('${BASE_SERVER_URL}/dhub/emulator/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -94,7 +96,7 @@ const App: React.FC = () => {
   const deleteResource = async (name: string, nickName: string) => {
     setLoading(true); // Show loading modal
     try {
-      const response = await fetch('http://10.160.83.213:8309/dhub/emulator/delete', {
+      const response = await fetch('${BASE_SERVER_URL}/dhub/emulator/delete', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -131,7 +133,7 @@ const App: React.FC = () => {
 
   const checkResourceStatus = async (name: string) => {
     try {
-      const response = await fetch(`http://10.160.83.213:8309/dhub/emulator/check/${name}`, {
+      const response = await fetch(`${BASE_SERVER_URL}/dhub/emulator/check/${name}`, {
         method: 'GET'
       });
       if (!response.ok) {
