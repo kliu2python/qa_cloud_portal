@@ -56,7 +56,7 @@ const App: React.FC = () => {
   const fetchResources = async (nickname: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://10.160.83.213:8309/dhub/emulator/list/${nickname}`, {
+      const response = await fetch(`http://10.160.24.88:32677/dhub/emulator/list/${nickname}`, {
         method: 'GET',
       });
       if (!response.ok) {
@@ -74,7 +74,7 @@ const App: React.FC = () => {
   const createEmulator = async (os: string, version: string) => {
     setLoading(true);
     try {
-      const response = await fetch('http://10.160.83.213:8309/dhub/emulator/create', {
+      const response = await fetch('http://10.160.24.88:32677/dhub/emulator/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +95,7 @@ const App: React.FC = () => {
   const deleteResource = async (name: string) => {
     setLoading(true);
     try {
-      const response = await fetch('http://10.160.83.213:8309/dhub/emulator/delete', {
+      const response = await fetch('http://10.160.24.88:32677/dhub/emulator/delete', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
