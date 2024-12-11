@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+
 import { Resource } from './EmulatorCloud';
+import config from '../config/config';
 
 interface SplitViewProps {
   resource: Resource;
@@ -28,7 +30,7 @@ const SplitView: React.FC<SplitViewProps> = ({ resource, launchVNC, onGoBack }) 
     }
 
     try {
-      const response = await fetch(`http://10.160.24.88:32677/dhub/emulator/adb/${resource.name}/${encodeURIComponent(cmd)}`, {
+      const response = await fetch(`${config.apiBaseUrl}/dhub/emulator/adb/${resource.name}/${encodeURIComponent(cmd)}`, {
         method: 'POST',
       });
 
@@ -62,7 +64,7 @@ const SplitView: React.FC<SplitViewProps> = ({ resource, launchVNC, onGoBack }) 
     }
 
     try {
-      const response = await fetch('http://10.160.24.88:32677/dhub/emulator/launch', {
+      const response = await fetch(`${config.apiBaseUrl}/dhub/emulator/launch`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
@@ -92,7 +94,7 @@ const SplitView: React.FC<SplitViewProps> = ({ resource, launchVNC, onGoBack }) 
     console.log(emulator)
     try {
       const response = await fetch(
-        `http://10.160.24.88:32677/dhub/emulator/terminal/${resource.name}/${emulator.pid}`,
+        `${config.apiBaseUrl}/dhub/emulator/terminal/${resource.name}/${emulator.pid}`,
         { method: 'POST' }
       );
 

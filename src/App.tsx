@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { Container, Row, Col, Dropdown } from 'react-bootstrap';
+
 import NickNamePage from './components/nickname';
 import ResourcePage from './components/EmulatorCloud';
 import CustomModal from './components/CustomModal';
@@ -12,6 +13,7 @@ import ReportError from './components/ReportError';
 import ResourceManagement from './components/ResourceManagement';
 import Header from './components/Header';
 import BrowserCloud from './components/BrowserCloud';
+import config from './config/config';
 
 interface Resource {
   adb_port: number;
@@ -56,7 +58,7 @@ const App: React.FC = () => {
   const fetchResources = async (nickname: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://10.160.24.88:32677/dhub/emulator/list/${nickname}`, {
+      const response = await fetch(`${config.apiBaseUrl}/dhub/emulator/list/${nickname}`, {
         method: 'GET',
       });
       if (!response.ok) {
@@ -74,7 +76,7 @@ const App: React.FC = () => {
   const createEmulator = async (os: string, version: string) => {
     setLoading(true);
     try {
-      const response = await fetch('http://10.160.24.88:32677/dhub/emulator/create', {
+      const response = await fetch(`${config.apiBaseUrl}/dhub/emulator/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +97,7 @@ const App: React.FC = () => {
   const deleteResource = async (name: string) => {
     setLoading(true);
     try {
-      const response = await fetch('http://10.160.24.88:32677/dhub/emulator/delete', {
+      const response = await fetch(`${config.apiBaseUrl}/dhub/emulator/delete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,7 +129,7 @@ const App: React.FC = () => {
 
   const checkResourceStatus = async (name: string) => {
     try {
-      const response = await fetch(`http://10.160.24.88:32677/dhub/emulator/check/${name}`, {
+      const response = await fetch(`${config.apiBaseUrl}/dhub/emulator/check/${name}`, {
         method: 'GET',
       });
       if (!response.ok) {
