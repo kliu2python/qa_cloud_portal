@@ -14,12 +14,18 @@ const Header: React.FC<HeaderProps> = ({ nickname, resetNickname, handleNickname
 
   const getTitle = (path: string): string => {
     switch (path) {
-      case '/emulator-cloud':
-        return 'Emulator Resources';
-      case '/':
-        return 'Home';
-      default:
-        return 'TaaS Cloud';
+        case '/emulator-cloud':
+            return 'Emulator Resources';
+        case '/browser-cloud':
+            return 'Browser Resources';
+        case '/resource':
+            return 'Resource Dashboard';
+        case '/report-error':
+            return 'Report an Error';
+        case '/':
+            return 'Home';
+        default:
+            return 'TaaS Cloud';
     }
   };
 

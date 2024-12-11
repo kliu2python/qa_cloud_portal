@@ -1,6 +1,12 @@
 import React from 'react';
 
-const BrowserCloud: React.FC = () => {
+interface BrowserCloudProps {
+    nickName: string;
+}
+
+const BrowserCloud: React.FC<BrowserCloudProps> = (
+    nickName
+) => {
   return (
     <div style={{ padding: '20px', textAlign: 'center' }}>
       <h1>Welcome to the TaaS Cloud</h1>

@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 import { Container, Row, Col, Dropdown } from 'react-bootstrap';
 import NickNamePage from './components/nickname';
-import ResourcePage from './components/resources';
+import ResourcePage from './components/EmulatorCloud';
 import CustomModal from './components/CustomModal';
 import LoadingModal from './components/LoadingModal';
 import HomePage from './components/HomePage'; // Import the new HomePage component
 import NavigateBar from './components/NavigateBar';
 import SourceManagement from './components/ResourceManagement';
+import ReportError from './components/ReportError';
 import ResourceManagement from './components/ResourceManagement';
 import Header from './components/Header';
 import BrowserCloud from './components/BrowserCloud';
@@ -159,7 +160,11 @@ const App: React.FC = () => {
           <Container fluid>
           <Routes>
             {/* Home Page */}
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={
+              <HomePage 
+                nickName={nickname}
+              />} 
+            />
             {/* Emulator Cloud Page */}
             <Route
               path="/emulator-cloud"
@@ -179,8 +184,22 @@ const App: React.FC = () => {
                 />
               }
             />
-            <Route path="/browser-cloud" element={<BrowserCloud />} />
-            <Route path="/resource" element={<ResourceManagement />} />
+            <Route path="/browser-cloud" element={
+              <BrowserCloud 
+                nickName={nickname}
+              />}
+            />
+            <Route path="/resource" element={
+              <ResourceManagement 
+                nickName={nickname}
+              />} 
+            />
+            <Route path="/report-error" element={
+              <ReportError
+                nickName={nickname}
+              />
+              } 
+            />
           </Routes>
           </Container>
         </div>

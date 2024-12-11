@@ -9,7 +9,10 @@ const NavigateBar: React.FC = () => {
     >
       {/* Header */}
       <div>
-        <h3 className="text-center mb-4">TaaS Cloud</h3>
+        <div className="text-center mb-4">
+          <h3 className="mb-1">TaaS</h3>
+          <h6 className="mb-1">Test as a Service</h6>
+        </div>
         <Link to="/" className="btn btn-outline-light d-block mb-3">
           Home
         </Link>
@@ -21,6 +24,9 @@ const NavigateBar: React.FC = () => {
         </Link>
         <Link to="/resource" className="btn btn-outline-light d-block mb-3">
           Resource Dashboard
+        </Link>
+        <Link to="/report-error" className="btn btn-outline-light d-block mb-3">
+          Report an Issue
         </Link>
       </div>
 

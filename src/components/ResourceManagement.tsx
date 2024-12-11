@@ -1,6 +1,12 @@
 import React from 'react';
 
-const ResourceManagement: React.FC = () => {
+interface ResourceManageProps {
+  nickName: string;
+}
+
+const ResourceManagement: React.FC<ResourceManageProps> = (
+  nickName
+) => {
   return (
     <div style={{ padding: '20px', textAlign: 'center' }}>
       <h1>Welcome to the TaaS Cloud</h1>
