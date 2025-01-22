@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
-import { Container, Row, Col, Dropdown } from 'react-bootstrap';
+import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import { Container} from 'react-bootstrap';
 
-import NickNamePage from './components/nickname';
 import ResourcePage from './components/EmulatorCloud';
 import CustomModal from './components/CustomModal';
 import LoadingModal from './components/LoadingModal';
 import HomePage from './components/HomePage'; // Import the new HomePage component
 import NavigateBar from './components/NavigateBar';
-import SourceManagement from './components/ResourceManagement';
 import ReportError from './components/ReportError';
 import ResourceManagement from './components/ResourceManagement';
 import Header from './components/Header';
