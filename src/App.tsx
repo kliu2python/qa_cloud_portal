@@ -14,6 +14,7 @@ import ResourceManagement from './components/ResourceManagement';
 import Header from './components/Header';
 import BrowserCloud from './components/BrowserCloud';
 import config from './config/config';
+import ReviewFinder from './components/ReviewFinder';
 
 interface Resource {
   adb_port: number;
@@ -58,7 +59,7 @@ const App: React.FC = () => {
   const fetchResources = async (nickname: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${config.apiBaseUrl}/dhub/emulator/list/${nickname}`, {
+      const response = await fetch(`${config.emulatorBaseUrl}/dhub/emulator/list/${nickname}`, {
         method: 'GET',
       });
       if (!response.ok) {
@@ -76,7 +77,7 @@ const App: React.FC = () => {
   const createEmulator = async (os: string, version: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${config.apiBaseUrl}/dhub/emulator/create`, {
+      const response = await fetch(`${config.emulatorBaseUrl}/dhub/emulator/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +98,7 @@ const App: React.FC = () => {
   const deleteResource = async (name: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${config.apiBaseUrl}/dhub/emulator/delete`, {
+      const response = await fetch(`${config.emulatorBaseUrl}/dhub/emulator/delete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,22 +126,6 @@ const App: React.FC = () => {
 
   const handleVersionSubmit = (os: string, version: string) => {
     createEmulator(os, version);
-  };
-
-  const checkResourceStatus = async (name: string) => {
-    try {
-      const response = await fetch(`${config.apiBaseUrl}/dhub/emulator/check/${name}`, {
-        method: 'GET',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to check resource status');
-      }
-      const data = await response.json();
-      return data.results.status;
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
   };
 
   const updateResourceStatus = (name: string, status: string) => {
@@ -180,7 +165,6 @@ const App: React.FC = () => {
                   nickName={nickname}
                   resetNickname={resetNickname}
                   handleCreateNew={() => setModalIsOpen(true)}
-                  checkResourceStatus={checkResourceStatus}
                   updateResourceStatus={updateResourceStatus}
                   handleNicknameSubmit={handleNicknameSubmit}
                 />
@@ -190,6 +174,9 @@ const App: React.FC = () => {
               <BrowserCloud 
                 nickName={nickname}
               />}
+            />
+            <Route path="/reviewfinder" element={
+              <ReviewFinder />}
             />
             <Route path="/resource" element={
               <ResourceManagement 

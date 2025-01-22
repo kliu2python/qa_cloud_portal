@@ -18,6 +18,8 @@ const Header: React.FC<HeaderProps> = ({ nickname, resetNickname, handleNickname
             return 'Emulator Resources';
         case '/browser-cloud':
             return 'Browser Resources';
+        case '/reviewfinder':
+            return 'FTNT Review Finder';
         case '/resource':
             return 'Resource Dashboard';
         case '/report-error':
@@ -31,6 +33,9 @@ const Header: React.FC<HeaderProps> = ({ nickname, resetNickname, handleNickname
 
   const title = getTitle(location.pathname);
 
+  // Check if the path is one of the specific ones where nickname and login should be shown
+  const showLogin = ['/emulator-cloud', '/browser-cloud', '/report-error'].includes(location.pathname);
+
   return (
     <Container fluid>
       <Row className="bg-primary text-white py-3 mb-4">
@@ -38,7 +43,7 @@ const Header: React.FC<HeaderProps> = ({ nickname, resetNickname, handleNickname
           <h1 className="mb-0">{title}</h1>
         </Col>
         <Col xs={4} className="text-end">
-          {nickname ? (
+          {showLogin && (nickname ? (
             <Dropdown>
               <Dropdown.Toggle variant="success">{nickname}</Dropdown.Toggle>
               <Dropdown.Menu>
@@ -47,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ nickname, resetNickname, handleNickname
             </Dropdown>
           ) : (
             <NickNamePage onSubmit={handleNicknameSubmit} />
-          )}
+          ))}
         </Col>
       </Row>
     </Container>

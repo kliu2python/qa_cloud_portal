@@ -21,7 +21,6 @@ interface ResourcePageProps {
   nickName: string;
   resetNickname: () => void;
   handleCreateNew: () => void;
-  checkResourceStatus: (name: string) => Promise<string | null>;
   updateResourceStatus: (name: string, status: string) => void;
 }
 
@@ -34,7 +33,6 @@ const ResourcePage: React.FC<ResourcePageProps> = ({
   nickName,
   resetNickname,
   handleCreateNew,
-  checkResourceStatus,
   updateResourceStatus,
   handleNicknameSubmit,
 }) => {
@@ -58,22 +56,12 @@ const ResourcePage: React.FC<ResourcePageProps> = ({
       });
     };
 
-    const intervalId = setInterval(() => {
-      resources.forEach(async (resource) => {
-        const status = await checkResourceStatus(resource.name);
-        if (status) {
-          updateResourceStatus(resource.name, status);
-        }
-      });
-    }, 5000);
-
     const timeoutId = setTimeout(enableLaunchButtons, 5000);
 
     return () => {
       clearTimeout(timeoutId);
-      clearInterval(intervalId);
     };
-  }, [resources, checkResourceStatus, updateResourceStatus]);
+  }, [resources, updateResourceStatus]);
 
   const handleLaunchVNC = (resource: Resource) => {
     setSelectedResource(resource); // Set the selected resource to show in SplitView

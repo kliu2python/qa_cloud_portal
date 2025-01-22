@@ -1,5 +1,6 @@
 const config = {
-    apiBaseUrl: 'http://10.43.88.19:443', // Replace with your actual base URL
+    emulatorBaseUrl: 'http://10.160.24.88:32677', // Replace with your actual base URL
+    reviewfinderUrl: 'http://10.160.24.88:30423'
   };
   
   export default config;
