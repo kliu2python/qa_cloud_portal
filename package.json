@@ -1,6 +1,6 @@
 {
   "name": "uiux_portal",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
@@ -11,12 +11,15 @@
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
     "bootstrap": "^5.3.3",
+    "file-saver": "^2.0.5",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.4",
     "react-dom": "^18.3.1",
+    "react-router-dom": "^7.0.1",
     "react-scripts": "^5.0.1",
     "typescript": "^3.4.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "PORT=3030 react-scripts start",
@@ -41,5 +44,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/file-saver": "^2.0.7",
+    "@types/react-router-dom": "^5.3.3"
   }
 }
