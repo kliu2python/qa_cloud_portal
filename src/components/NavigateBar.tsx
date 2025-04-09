@@ -22,6 +22,9 @@ const NavigateBar: React.FC = () => {
         <Link to="/browser-cloud" className="btn btn-outline-light d-block mb-3">
           Browser Cloud
         </Link>
+        <Link to="/jenkins-cloud" className="btn btn-outline-light d-block mb-3">
+          Jenkins Cloud
+        </Link>
         <Link to="/reviewfinder" className="btn btn-outline-light d-block mb-3">
           FortiReviewFinder
         </Link>

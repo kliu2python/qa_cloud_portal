@@ -13,6 +13,7 @@ import Header from './components/Header';
 import BrowserCloud from './components/BrowserCloud';
 import config from './config/config';
 import ReviewFinder from './components/ReviewFinder';
+import JenkinsCloud from './components/JenkinsCloud';
 
 interface Resource {
   adb_port: number;
@@ -170,6 +171,11 @@ const App: React.FC = () => {
             />
             <Route path="/browser-cloud" element={
               <BrowserCloud 
+                nickName={nickname}
+              />}
+            />
+            <Route path="/jenkins-cloud" element={
+              <JenkinsCloud 
                 nickName={nickname}
               />}
             />

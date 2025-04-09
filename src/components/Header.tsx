@@ -20,6 +20,8 @@ const Header: React.FC<HeaderProps> = ({ nickname, resetNickname, handleNickname
             return 'Browser Resources';
         case '/reviewfinder':
             return 'FTNT Review Finder';
+        case '/jenkins-cloud':
+          return 'Jenkins Cloud';
         case '/resource':
             return 'Resource Dashboard';
         case '/report-error':
