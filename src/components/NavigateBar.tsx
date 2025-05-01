@@ -36,7 +36,7 @@ const NavigateBar: React.FC = () => {
       {/* Footer */}
       <div className="text-center mt-4">
         <hr className="border-light" />
-        <p className="mb-1">Version: 2.0.0</p>
+        <p className="mb-1">Version: 4.0.0</p>
         <p className="mb-0">Editor: Jiahao Liu (ljiahao@fortinet.com)</p>
       </div>
     </div>
