@@ -1,252 +1,295 @@
-// JenkinsDashboard.tsx
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Row,
   Col,
   Button,
-  ListGroup,
-  Alert
+  Card,
+  Modal,
+  Form,
+  Spinner
 } from 'react-bootstrap';
-import ParameterModal from './ParameterModal';
-import BuildHistoryTable, { BuildHistoryRecord } from './BuildHistoryTable';
-import '../styles/CustomModal.css';
+import { useNavigate } from 'react-router-dom';
 
-interface TreeNode {
+interface Server {
+  id?: string;
+  ip: string;
   name: string;
-  children: { [key: string]: TreeNode };
+  apiToken: string;
+  un: string;
 }
 
-const buildTree = (paths: string[]): TreeNode => {
-  const root: TreeNode = { name: 'root', children: {} };
-  paths.forEach(path => {
-    const parts = path.split('/');
-    let current = root;
-    parts.forEach(part => {
-      if (!current.children[part]) {
-        current.children[part] = { name: part, children: {} };
+interface JobInitStatus {
+  ip?: string;
+  un?: string;
+  apiToken?: string;
+  name: string;
+  status?: 'loading' | 'ready' | 'error' | 'deleting';
+  errorMsg?: string;
+}
+
+const ServerListPage: React.FC = () => {
+  const [jobs, setJobs] = useState<JobInitStatus[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [newJob, setNewJob] = useState<Partial<Server>>({});
+  const [showApiTokenMasked, setShowApiTokenMasked] = useState(false);
+  const navigate = useNavigate();
+
+  const fetchJobs = async () => {
+    try {
+      const res = await fetch(`http://10.160.24.88:31224/api/v1/jenkins_cloud/jobs`);
+      const data = await res.json();
+      if (data.documents) {
+        const jobList = data.documents.map((j: any) => ({
+          name: j.name,
+          ip: j.server_ip,
+          un: j.server_un,
+          apiToken: j.server_pw,
+          status: 'ready'
+        }));
+        setJobs(jobList);
       }
-      current = current.children[part];
-    });
-  });
-  return root;
-};
-
-interface ParameterDefinition {
-  _class: string;
-  name: string;
-  description?: string;
-  defaultParameterValue?: {
-    _class: string;
-    name: string;
-    value: string;
+    } catch (error) {
+      console.error("Failed to fetch saved jobs", error);
+    }
   };
-  choices?: string[];
-  type?: string;
-}
 
-interface JenkinsDashboardProps {
-  nickName: string;
-}
-
-const JenkinsDashboard: React.FC<JenkinsDashboardProps> = ({ nickName }) => {
-  const [jobPathsList, setJobPathsList] = useState<string[]>([]);
-  const [jobTree, setJobTree] = useState<TreeNode | null>(null);
-  const [currentPath, setCurrentPath] = useState<string[]>([]);
-  const [alertMsg, setAlertMsg] = useState<string>('');
-  const [runningTasks, setRunningTasks] = useState<any[]>([]);
-  const [requiredParams, setRequiredParams] = useState<ParameterDefinition[]>([]);
-  const [loadingParams, setLoadingParams] = useState<boolean>(false);
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [buildHistory, setBuildHistory] = useState<BuildHistoryRecord[]>([]);
-
-  // Fetch job paths list from API on mount.
   useEffect(() => {
-    fetch("http://localhost:8080/api/v1/jenkins/list")
-      .then(res => res.json())
-      .then(data => {
-         if (data.results) {
-           // Filter only jobs starting with mobile_test, ui_test, or smoke_testing.
-           const filtered = data.results.filter((job: string) =>
-             job.startsWith("mobile_test") ||
-             job.startsWith("ui_test") ||
-             job.startsWith("smoke_testing")
-           );
-           setJobPathsList(filtered);
-           setJobTree(buildTree(filtered));
-         }
-      })
-      .catch(err => console.error("Error fetching job list:", err));
+    fetchJobs();
   }, []);
 
-  // Dummy running tasks (replace with real API calls)
-  useEffect(() => {
-    setRunningTasks([
-      { _id: '123', job_name: 'mobile_test/FortiToken_Mobile/iOS/ios16_auto_test', status: 'running', build_number: 105 }
-    ]);
-  }, []);
-
-  // When at a leaf node, fetch required parameters and build history.
-  useEffect(() => {
-    if (currentPath.length === 0) return;
-    const node = getCurrentNode();
-    if (node && Object.keys(node.children).length === 0) {
-      const jobName = currentPath.join('/');
-      setLoadingParams(true);
-      fetch(`http://localhost:8080/api/v1/jenkins/parameters?job_name=${encodeURIComponent(jobName)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.parameters) {
-            setRequiredParams(data.parameters);
-          }
-        })
-        .catch(err => console.error("Error fetching parameters:", err))
-        .finally(() => setLoadingParams(false));
-
-      // Fetch build history for this job.
-      fetch(`http://localhost:8080/api/v1/jenkins/build_history/${encodeURIComponent(jobName)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.results) {
-            setBuildHistory(data.results);
-          }
-        })
-        .catch(err => console.error("Error fetching build history:", err));
+  const handleInputChange = (e: React.ChangeEvent<any>) => {
+    const { name, value } = e.target;
+    if (name === 'apiToken' && value !== '******') {
+      setShowApiTokenMasked(false);
     }
-  }, [currentPath, jobTree]);
-
-  const getCurrentNode = (): TreeNode | null => {
-    if (!jobTree) return null;
-    let node: TreeNode = jobTree;
-    for (const part of currentPath) {
-      if (!node.children[part]) {
-        return null;
-      }
-      node = node.children[part];
-    }
-    return node;
+    setNewJob(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSelect = (newPath: string[]) => {
-    setCurrentPath(newPath);
-  };
+  const handleStartJob = () => {
+    if (!newJob.ip || !newJob.apiToken || !newJob.name || !newJob.un) return;
 
-  const handleBack = () => {
-    if (currentPath.length > 0) {
-      setCurrentPath(currentPath.slice(0, -1));
-    }
-  };
+    const job: JobInitStatus = {
+      ip: newJob.ip,
+      apiToken: newJob.apiToken,
+      name: newJob.name,
+      un: newJob.un,
+      status: 'loading'
+    };
 
-  // Left Sidebar: TreeView Component.
-  const TreeView: React.FC<{ node: TreeNode; currentPath: string[]; onSelect: (newPath: string[]) => void; }> = ({ node, currentPath, onSelect }) => {
-    if (!node) return null;
-    const childKeys = Object.keys(node.children);
-    return (
-      <ListGroup>
-        {childKeys.map((key, index) => (
-          <ListGroup.Item key={index} action onClick={() => onSelect([...currentPath, key])}>
-            {key} {Object.keys(node.children[key].children).length > 0 ? ' >' : ''}
-          </ListGroup.Item>
-        ))}
-      </ListGroup>
-    );
-  };
-
-  // Right Side: JobDetails Component.
-  const JobDetails: React.FC<{ path: string[]; }> = ({ path }) => {
-    const jobName = path.slice(-1)[0];
-    return (
-      <div>
-        <h4>{jobName}</h4>
-        <Button variant="primary" onClick={() => setShowModal(true)}>
-          Start Build
-        </Button>
-      </div>
-    );
-  };
-
-  // Show running jobs only at root level.
-  const showRunningJobs = currentPath.length === 0;
-
-  // Handle modal submit: receive final parameters from the modal.
-  const handleModalSubmit = (finalParams: { [key: string]: string }) => {
-    const jobName = currentPath.join('/');
-    const uid = Date.now().toString();
-    fetch('/api/v1/jenkins/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        job_name: jobName,
-        parameters: finalParams,
-        uid,
-        nickname: nickName
-      })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.result) {
-          setAlertMsg('Job started successfully.');
-        } else {
-          setAlertMsg('Failed to start job.');
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        setAlertMsg('Error starting job.');
-      });
+    setJobs(prev => [...prev, job]);
     setShowModal(false);
+
+    const checkStatus = async () => {
+      try {
+        const res = await fetch(`http://10.160.24.88:31224/api/v1/jenkins_cloud/jobs/parameters`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            server_ip: job.ip,
+            server_pw: job.apiToken,
+            server_un: job.un,
+            job_name: job.name
+          })
+        });
+
+        const data = await res.json();
+        if (data.results) {
+          setJobs(prev =>
+            prev.map(j =>
+              j.name === job.name && j.ip === job.ip
+                ? { ...j, status: 'ready' }
+                : j
+            )
+          );
+        } else {
+          throw new Error(data.message || 'Access denied');
+        }
+      } catch (err) {
+        setJobs(prev =>
+          prev.map(j =>
+            j.name === job.name && j.ip === job.ip
+              ? { ...j, status: 'error', errorMsg: (err as Error).message }
+              : j
+          )
+        );
+      }
+    };
+
+    const poll = async () => {
+      const current = jobs.find(j => j.name === job.name && j.ip === job.ip);
+      if (!current || current.status === 'loading') {
+        await checkStatus();
+        setTimeout(poll, 3000);
+      }
+    };
+
+    setTimeout(poll, 1000);
+  };
+
+  const handleEnter = (job: JobInitStatus) => {
+    navigate(`/jenkins-cloud/${job.name}`, {
+      state: { server: job }
+    });
+  };
+
+  const handleCopy = (job: JobInitStatus) => {
+    setNewJob({
+      name: job.name,
+      ip: job.ip || '',
+      un: job.un || '',
+      apiToken: job.apiToken || ''
+    });
+    setShowApiTokenMasked(true);
+    setShowModal(true);
+  };
+
+  const handleDelete = async (jobName: string) => {
+    const confirmDelete = window.confirm(`Are you sure you want to delete "${jobName}"?`);
+    if (!confirmDelete) return;
+
+    setJobs(prev => prev.map(job =>
+      job.name === jobName ? { ...job, status: 'deleting' } : job
+    ));
+
+    try {
+      const res = await fetch(`http://10.160.24.88:31224/api/v1/jenkins_cloud/jobs/${jobName}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        const pollUntilDeleted = async () => {
+          const checkRes = await fetch(`http://10.160.24.88:31224/api/v1/jenkins_cloud/jobs/${jobName}`);
+          const checkData = await checkRes.json();
+          if (!checkData || checkData.length === 0) {
+            setJobs(prev => prev.filter(job => job.name !== jobName));
+          } else {
+            setTimeout(pollUntilDeleted, 2000);
+          }
+        };
+        pollUntilDeleted();
+      } else {
+        console.error(`Failed to delete job "${jobName}"`);
+        setJobs(prev => prev.map(job =>
+          job.name === jobName ? { ...job, status: 'error', errorMsg: 'Failed to delete' } : job
+        ));
+      }
+    } catch (error) {
+      console.error("Delete request failed", error);
+    }
   };
 
   return (
-    <Container style={{ padding: '20px' }}>
-      {alertMsg && <Alert variant="info">{alertMsg}</Alert>}
-      <Row className="g-0">
-        {/* Left Sidebar: Navigation Tree (approx 2/5 width) */}
-        <Col md={2} style={{ paddingRight: '5px' }}>
-          {currentPath.length > 0 && (
-            <Button variant="secondary" onClick={handleBack} className="mb-3">
-              &larr; Back
-            </Button>
-          )}
-          {(!getCurrentNode() || Object.keys(getCurrentNode()!.children).length > 0) ? (
-            <TreeView node={getCurrentNode() || jobTree!} currentPath={currentPath} onSelect={handleSelect} />
-          ) : (
-            <Fragment>
-              <JobDetails path={currentPath} />
-              {loadingParams && <p>Loading parameters...</p>}
-            </Fragment>
-          )}
-        </Col>
-        {/* Right Main Area */}
-        <Col md={10} style={{ paddingLeft: '5px' }}>
-          {showRunningJobs ? (
-            <>
-              <h4>Running Jobs</h4>
-              <ListGroup className="mb-3">
-                {runningTasks.map((task, idx) => (
-                  <ListGroup.Item key={idx}>
-                    UID: {task._id} | Job: {task.job_name} | Status: {task.status} | Build #{task.build_number}
-                  </ListGroup.Item>
-                ))}
-              </ListGroup>
-            </>
-          ) : (
-            <>
-              <h4>Build History</h4>
-              <BuildHistoryTable records={buildHistory} />
-            </>
-          )}
+    <Container style={{ paddingTop: '20px' }}>
+      <Row className="align-items-center mb-3">
+        <Col><h3>Tracked Jenkins Jobs</h3></Col>
+        <Col className="text-end">
+          <Button variant="outline-secondary" onClick={fetchJobs} className="me-2">Refresh</Button>
+          <Button variant="primary" onClick={() => {
+            setNewJob({});
+            setShowApiTokenMasked(false);
+            setShowModal(true);
+          }}>New</Button>
         </Col>
       </Row>
-      {/* ParameterModal Popup */}
-      <ParameterModal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        onSubmit={handleModalSubmit}
-        requiredParams={requiredParams}
-      />
+
+      <Row xs={1} md={2} lg={3} className="g-4">
+        {jobs.map((job, i) => (
+          <Col key={i}>
+            <Card>
+              <Card.Body>
+                <Card.Title>
+                  {job.name}
+                  {(job.status === 'loading' || job.status === 'deleting') && <Spinner animation="border" size="sm" className="ms-2" />}
+                  {job.status === 'error' && <div className="text-danger">{job.errorMsg}</div>}
+                </Card.Title>
+
+                <div className="d-flex gap-2 mt-2">
+                  <Button
+                    size="sm"
+                    onClick={() => handleEnter(job)}
+                    disabled={job.status !== 'ready'}
+                  >
+                    Enter
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline-secondary"
+                    onClick={() => handleCopy(job)}
+                    disabled={job.status !== 'ready'}
+                  >
+                    Copy
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => handleDelete(job.name)}
+                    disabled={job.status !== 'ready'}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>New Jenkins Job Access</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Job Name</Form.Label>
+              <Form.Control
+                name="name"
+                value={newJob.name || ''}
+                placeholder="e.g. Android Pipeline"
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>IP Address</Form.Label>
+              <Form.Control
+                name="ip"
+                value={newJob.ip || ''}
+                placeholder="e.g. 10.160.13.30:8080"
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Username</Form.Label>
+              <Form.Control
+                name="un"
+                value={newJob.un || ''}
+                placeholder="Jenkins username"
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>API Token</Form.Label>
+              <Form.Control
+                name="apiToken"
+                type="text"
+                value={showApiTokenMasked ? '******' : newJob.apiToken || ''}
+                placeholder="Jenkins API token"
+                onChange={(e) => {
+                  if (e.target.value === '******') return;
+                  setShowApiTokenMasked(false);
+                  handleInputChange(e);
+                }}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+          <Button variant="primary" onClick={handleStartJob}>Verify</Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
 
-export default JenkinsDashboard;
+export default ServerListPage;

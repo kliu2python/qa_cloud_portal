@@ -3,6 +3,8 @@ import { useLocation } from 'react-router-dom';
 import { Container, Row, Col, Dropdown } from 'react-bootstrap';
 import NickNamePage from './nickname';
 
+import { unslugify } from '../utils/slugify';
+
 interface HeaderProps {
   nickname: string;
   resetNickname: () => void;
@@ -13,6 +15,15 @@ const Header: React.FC<HeaderProps> = ({ nickname, resetNickname, handleNickname
   const location = useLocation();
 
   const getTitle = (path: string): string => {
+    if (path.startsWith('/jenkins-cloud/')) {
+      // Extract server slug after "/jenkins-cloud/"
+      const serverSlug = path.replace('/jenkins-cloud/', '');
+      if (serverSlug) {
+        return unslugify(serverSlug);
+      }
+      return 'Jenkins Cloud';
+    }
+    
     switch (path) {
         case '/emulator-cloud':
             return 'Emulator Resources';
