@@ -16,6 +16,9 @@ import Header from './components/Header';
 import BrowserCloud from './components/BrowserCloud';
 import config from './config/config';
 import ReviewFinder from './components/ReviewFinder';
+import ServerListPage from './components/JenkinsCloud';
+import ServerDetailPage from './components/ServerDetailPage'; // You’ll create this below
+import JobDetailPage from './components/ServerDetailPage';
 
 interface Resource {
   adb_port: number;
@@ -176,6 +179,10 @@ const App: React.FC = () => {
                 nickName={nickname}
               />}
             />
+            <Route path="/jenkins-cloud" element={
+              <ServerListPage 
+              />}
+            />
             <Route path="/reviewfinder" element={
               <ReviewFinder />}
             />
@@ -190,6 +197,7 @@ const App: React.FC = () => {
               />
               } 
             />
+            <Route path="/jenkins-cloud/:jobName" element={<JobDetailPage />} />
           </Routes>
           </Container>
         </div>

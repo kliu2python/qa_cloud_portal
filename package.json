@@ -22,7 +22,8 @@
     "slick-carousel": "^1.8.1",
     "typescript": "^3.4.5",
     "web-vitals": "^2.1.4",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "react-icons": "^5.5.0"
   },
   "scripts": {
     "start": "PORT=3000 react-scripts start",
