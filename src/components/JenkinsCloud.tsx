@@ -107,7 +107,7 @@ const ServerListPage: React.FC = () => {
     setJobs(prev => [...prev, job]);
     setShowModal(false);
 
-    fetch('${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs/parameters', {
+    fetch(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs/parameters`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -122,6 +122,7 @@ const ServerListPage: React.FC = () => {
       .then(data => {
         if (data.results) {
           setJobs(prev => prev.map(j => j.name === job.name ? { ...j, status: 'ready' } : j));
+          fetchJobs();
         } else {
           throw new Error(data.message || 'Access denied');
         }
