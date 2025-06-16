@@ -21,8 +21,9 @@ const JobDetailPage: React.FC = () => {
     if (!server || !jobName) return;
 
     const checkJob = async () => {
+      let apiUrl = `${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs/${jobName}`;
       try {
-        const res = await fetch(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs/${jobName}`);
+        const res = await fetch(apiUrl);
         const data = await res.json();
         console.log(data.length)
         if (data.documents.length > 0) {
@@ -82,7 +83,8 @@ const JobDetailPage: React.FC = () => {
       });
     }
 
-    const res = await fetch(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/execute`, {
+    let postUrl = `${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/execute`;
+    const res = await fetch(postUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body,
@@ -107,8 +109,9 @@ const JobDetailPage: React.FC = () => {
 
   const refreshBuildStatus = async (build_num: number) => {
     setBuildStatuses(prev => ({ ...prev, [build_num]: 'Loading...' }));
+    let apiUrl = `${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs/build/result?job_name=${jobName}&build_number=${build_num}`;
     try {
-      const res = await fetch(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs/build/result?job_name=${jobName}&build_number=${build_num}`);
+      const res = await fetch(apiUrl);
       const data = await res.json();
       if (data && data) {
         setBuildStatuses(prev => ({ ...prev, [build_num]: data }));

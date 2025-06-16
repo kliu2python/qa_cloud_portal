@@ -45,8 +45,10 @@ const ServerListPage: React.FC = () => {
   const navigate = useNavigate();
 
   const fetchJobs = async () => {
+    let apiUrl = `${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs`;
     try {
-      const res = await fetch(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs`);
+      console.log(`url to call jobs ${apiUrl}`);
+      const res = await fetch(apiUrl);
       const data = await res.json();
       if (data.documents) {
         const jobList = data.documents.map((j: any) => ({
@@ -66,8 +68,9 @@ const ServerListPage: React.FC = () => {
   };
 
   const fetchGroups = async () => {
+    let apiUrl = `${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/groups`;
     try {
-      const res = await fetch(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/groups`);
+      const res = await fetch(apiUrl);
       const data = await res.json();
       console.log(data)
       if (data.results) {
@@ -104,10 +107,12 @@ const ServerListPage: React.FC = () => {
       status: 'loading'
     };
 
+    let apiUrl = `${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs/parameters`;
+
     setJobs(prev => [...prev, job]);
     setShowModal(false);
 
-    fetch('${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs/parameters', {
+    fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -158,8 +163,11 @@ const ServerListPage: React.FC = () => {
       job.name === jobName ? { ...job, status: 'deleting' } : job
     ));
 
+    let apiUrl = `${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs/${jobName}`;
+
     try {
-      const res = await fetch(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs/${jobName}`, {
+      console.log(`delete job by url ${apiUrl}`);
+      const res = await fetch(apiUrl, {
         method: 'DELETE'
       });
       if (res.ok) {
