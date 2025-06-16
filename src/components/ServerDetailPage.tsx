@@ -20,7 +20,7 @@ const JobDetailPage: React.FC = () => {
 
     const checkJob = async () => {
       try {
-        const res = await fetch(`http://10.160.24.88:31224/api/v1/jenkins_cloud/jobs/${jobName}`);
+        const res = await fetch(`http://localhost:8080/api/v1/jenkins_cloud/jobs/${jobName}`);
         const data = await res.json();
         console.log(data.length)
         if (data.documents.length > 0) {
@@ -80,7 +80,7 @@ const JobDetailPage: React.FC = () => {
       });
     }
 
-    const res = await fetch(`http://10.160.24.88:31224/api/v1/jenkins_cloud/execute`, {
+    const res = await fetch(`http://localhost:8080/api/v1/jenkins_cloud/execute`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body,
@@ -106,7 +106,7 @@ const JobDetailPage: React.FC = () => {
   const refreshBuildStatus = async (build_num: number) => {
     setBuildStatuses(prev => ({ ...prev, [build_num]: 'Loading...' }));
     try {
-      const res = await fetch(`http://10.160.24.88:31224/api/v1/jenkins_cloud/jobs/build/result?job_name=${jobName}&build_number=${build_num}`);
+      const res = await fetch(`http://localhost:8080/api/v1/jenkins_cloud/jobs/build/result?job_name=${jobName}&build_number=${build_num}`);
       const data = await res.json();
       if (data && data) {
         setBuildStatuses(prev => ({ ...prev, [build_num]: data }));

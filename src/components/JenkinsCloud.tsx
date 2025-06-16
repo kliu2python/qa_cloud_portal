@@ -43,7 +43,7 @@ const ServerListPage: React.FC = () => {
 
   const fetchJobs = async () => {
     try {
-      const res = await fetch(`http://10.160.24.88:31224/api/v1/jenkins_cloud/jobs`);
+      const res = await fetch(`http://localhost:8080/api/v1/jenkins_cloud/jobs`);
       const data = await res.json();
       if (data.documents) {
         const jobList = data.documents.map((j: any) => ({
@@ -64,7 +64,7 @@ const ServerListPage: React.FC = () => {
 
   const fetchGroups = async () => {
     try {
-      const res = await fetch(`http://10.160.24.88:31224/api/v1/jenkins_cloud/groups`);
+      const res = await fetch(`http://localhost:8080/api/v1/jenkins_cloud/groups`);
       const data = await res.json();
       console.log(data)
       if (data.results) {
@@ -104,7 +104,7 @@ const ServerListPage: React.FC = () => {
     setJobs(prev => [...prev, job]);
     setShowModal(false);
 
-    fetch('http://10.160.24.88:31224/api/v1/jenkins_cloud/jobs/parameters', {
+    fetch('http://localhost:8080/api/v1/jenkins_cloud/jobs/parameters', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -156,7 +156,7 @@ const ServerListPage: React.FC = () => {
     ));
 
     try {
-      const res = await fetch(`http://10.160.24.88:31224/api/v1/jenkins_cloud/jobs/${jobName}`, {
+      const res = await fetch(`http://localhost:8080/api/v1/jenkins_cloud/jobs/${jobName}`, {
         method: 'DELETE'
       });
       if (res.ok) {
