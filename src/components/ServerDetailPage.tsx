@@ -170,7 +170,8 @@ const JobDetailPage: React.FC = () => {
         <ul>
           {Object.entries(autoRunDoc.builds).map(([key, build]: [string, any], idx: number) => {
             const allureUrl = `${build.build_url.replace(/\/$/, '')}/allure`;
-            const status = buildStatuses[build.build_num] || 'Fetching...';
+            const rawStatus = buildStatuses[build.build_num];
+            const status = typeof rawStatus === 'string' ? rawStatus : (rawStatus || 'Error');
             const color = getStatusColor(status);
             return (
               <li key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
