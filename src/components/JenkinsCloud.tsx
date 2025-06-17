@@ -1,5 +1,5 @@
 // Updated ServerListPage.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Container,
   Row,
@@ -8,7 +8,8 @@ import {
   Card,
   Modal,
   Form,
-  Spinner
+  Spinner,
+  Accordion
 } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,6 +42,7 @@ const ServerListPage: React.FC = () => {
   const [selectedTag, setSelectedTag] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('');
   const [groups, setGroups] = useState<string[]>([]);
+  const [groupOpen, setGroupOpen] = useState<{ [key: string]: boolean }>({});
 
   const navigate = useNavigate();
 
@@ -181,10 +183,43 @@ const ServerListPage: React.FC = () => {
            job.name.toLowerCase().includes(searchText.toLowerCase());
   });
 
-  const groupedJobs: { [key: string]: JobInitStatus[] } = {};
-  [...groups, ''].forEach(group => {
-    groupedJobs[group || 'No Group'] = filteredJobs.filter(job => job.group === group);
-  });
+  // const groupedJobs: { [key: string]: JobInitStatus[] } = {};
+  // [...groups, ''].forEach(group => {
+  //   groupedJobs[group || 'No Group'] = filteredJobs.filter(job => job.group === group);
+  // });
+
+  const groupedJobs = useMemo(() => jobs.reduce((acc, job) => {
+    const group = job.group || 'No Group';
+    if (!acc[group]) acc[group] = [];
+    acc[group].push(job);
+    return acc;
+  }, {} as { [key: string]: any[] }), [jobs]);
+
+  const filteredGroups = Object.entries(groupedJobs).map(([groupName, groupJobs]) => {
+    const filteredJobs = groupJobs.filter(job => {
+      const matchesTag = selectedTag === '__none__'
+        ? !job.tags || job.tags.length === 0
+        : selectedTag ? (job.tags || []).includes(selectedTag) : true;
+      const matchesSearch = searchText ? job.name.toLowerCase().includes(searchText.toLowerCase()) : true;
+      return matchesTag && matchesSearch;
+    });
+    return [groupName, filteredJobs] as const;
+  }).filter(([_, jobs]) => jobs.length > 0);
+
+  const [manuallyOpened, setManuallyOpened] = useState<Set<string>>(new Set());
+
+  const toggleManualOpen = (key: string) => {
+    setManuallyOpened(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) newSet.delete(key);
+      else newSet.add(key);
+      return newSet;
+    });
+  };
+
+  const expandedKeys = filteredGroups.map(([groupName], index) =>
+    (selectedTag || searchText || manuallyOpened.has(String(index))) ? String(index) : null
+  ).filter(Boolean) as string[];
 
   return (
     <Container style={{ paddingTop: '20px' }}>
@@ -212,49 +247,48 @@ const ServerListPage: React.FC = () => {
             ))}
           </Form.Select>
         </Col>
-        <Col>
-          <Form.Select value={selectedGroup} onChange={(e) => setSelectedGroup(e.target.value)}>
-            <option value="">All Groups</option>
-            {groups.map(group => <option key={group}>{group}</option>)}
-          </Form.Select>
-        </Col>
         <Col xs="auto">
           <Button variant="outline-secondary" onClick={() => {
             setSearchText('');
             setSelectedTag('');
-            setSelectedGroup('');
+            setManuallyOpened(new Set());
           }}>Reset</Button>
         </Col>
       </Row>
 
-      {Object.entries(groupedJobs).map(([groupName, groupJobs]) => (
-        <div key={groupName} className="mb-4">
-          <h5>{groupName}</h5>
-          <hr />
-          <Row xs={1} md={2} lg={3} className="g-4">
-            {groupJobs.map((job, i) => (
-              <Col key={i}>
-                <Card>
-                  <Card.Body>
-                    <Card.Title>
-                      {job.name}
-                      {(job.status === 'loading' || job.status === 'deleting') && <Spinner animation="border" size="sm" className="ms-2" />}
-                      {job.status === 'error' && <div className="text-danger">{job.errorMsg}</div>}
-                    </Card.Title>
-                    <div className="mb-2"><strong>Group:</strong> {job.group || 'None'}</div>
-                    <div className="mb-2"><strong>Tags:</strong> {job.tags?.join(', ') || 'None'}</div>
-                    <div className="d-flex gap-2 mt-2">
-                      <Button size="sm" onClick={() => handleEnter(job)} disabled={job.status !== 'ready'}>Enter</Button>
-                      <Button size="sm" variant="outline-secondary" onClick={() => handleCopy(job)} disabled={job.status !== 'ready'}>Copy</Button>
-                      <Button size="sm" variant="danger" onClick={() => handleDelete(job.name)} disabled={job.status !== 'ready'}>Delete</Button>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </div>
-      ))}
+      <Accordion activeKey={expandedKeys} alwaysOpen>
+        {filteredGroups.map(([groupName, groupJobs], index) => (
+          <Accordion.Item eventKey={String(index)} key={groupName}>
+            <Accordion.Header onClick={() => toggleManualOpen(String(index))}>
+              {groupName}
+            </Accordion.Header>
+            <Accordion.Body>
+              <Row xs={1} md={2} lg={3} className="g-4">
+                {groupJobs.map((job, i) => (
+                  <Col key={i}>
+                    <Card>
+                      <Card.Body>
+                        <Card.Title>
+                          {job.name}
+                          {(job.status === 'loading' || job.status === 'deleting') && <Spinner animation="border" size="sm" className="ms-2" />}
+                          {job.status === 'error' && <div className="text-danger">{job.errorMsg}</div>}
+                        </Card.Title>
+                        <div className="mb-2"><strong>Group:</strong> {job.group || 'None'}</div>
+                        <div className="mb-2"><strong>Tags:</strong> {job.tags?.join(', ') || 'None'}</div>
+                        <div className="d-flex gap-2 mt-2">
+                          <Button size="sm" onClick={() => handleEnter(job)} disabled={job.status !== 'ready'}>Enter</Button>
+                          <Button size="sm" variant="outline-secondary" onClick={() => handleCopy(job)} disabled={job.status !== 'ready'}>Copy</Button>
+                          <Button size="sm" variant="danger" onClick={() => handleDelete(job.name)} disabled={job.status !== 'ready'}>Delete</Button>
+                        </div>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            </Accordion.Body>
+          </Accordion.Item>
+        ))}
+      </Accordion>
 
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
