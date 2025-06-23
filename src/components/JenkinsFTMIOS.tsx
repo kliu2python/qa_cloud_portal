@@ -41,6 +41,8 @@ const JenkinsFTMIOS: React.FC = () => {
   const [testResultLogs, setTestResultLogs] = useState<any[]>([]);
   const [refreshingIndex, setRefreshingIndex] = useState<number | null>(null);
   const [showResultsModal, setShowResultsModal] = useState(false);
+  const [selectedScope, setSelectedScope] = useState<'Functional' | 'Integration' | 'Regression' | 'Acceptable' | ''>('');
+
 
   const ipaOptions = imageOptions.filter(name => name.endsWith('.ipa'));
   const isReadyToRun = selectedEnv && selectedImage && selectedProduct && selectedPlatforms.length > 0;
@@ -192,19 +194,87 @@ const JenkinsFTMIOS: React.FC = () => {
         </datalist>
       </Form.Group>
 
-      {/* Select Testing Product */}
       <Form.Group className="mb-3">
+        <Form.Label>Select Test Scope *</Form.Label>
+        <Form.Select
+            value={selectedScope}
+            onChange={(e) => {
+            const scope = e.target.value as typeof selectedScope;
+            setSelectedScope(scope);
+
+            switch (scope) {
+                case 'Functional':
+                setSelectedProduct('ALL');
+                break;
+                case 'Integration':
+                setSelectedProduct('');
+                break;
+                case 'Regression':
+                setSelectedProduct('');
+                break;
+                case 'Acceptable':
+                setSelectedProduct('FortiGate');
+                break;
+                default:
+                setSelectedProduct('');
+            }
+            }}
+        >
+            <option value="">-- Select Test Scope --</option>
+            <option value="Functional">Functional Test (more test cases)</option>
+            <option value="Integration">Integration Test</option>
+            <option value="Regression">Regression Test</option>
+            <option value="Acceptable">Acceptable Test (less test cases)</option>
+        </Form.Select>
+        </Form.Group>
+
+
+        <Form.Group className="mb-3">
         <Form.Label>Select Testing Product *</Form.Label>
         <Form.Select
-          value={selectedProduct}
-          onChange={(e) => setSelectedProduct(e.target.value)}
+            value={selectedProduct}
+            onChange={(e) => setSelectedProduct(e.target.value)}
+            disabled={
+            selectedScope === '' || selectedScope === 'Acceptable' || 
+            (selectedScope === 'Functional' && selectedProduct === 'ALL')
+            }
         >
-          <option value="">-- Select Testing Product --</option>
-          {[ 'ALL', 'FortiGate', 'FortiAuthenticator', 'FortiTokenCloud_FAC', 'FortiTokenCloud_FGT', 'FortiToken', 'FortiToken Cloud' ].map((prod, idx) => (
-            <option key={idx} value={prod}>{prod}</option>
-          ))}
+            <option value="">-- Select Testing Product --</option>
+            {(() => {
+            const allOptions = [
+                'ALL',
+                'FortiGate',
+                'FortiAuthenticator',
+                'FortiTokenCloud_FAC',
+                'FortiTokenCloud_FGT',
+                'FortiToken',
+                'FortiToken Cloud'
+            ];
+
+            if (selectedScope === 'Functional') {
+                return <option value="ALL">ALL</option>;
+            }
+
+            if (selectedScope === 'Integration') {
+                return allOptions
+                .filter(opt => opt !== 'ALL')
+                .map((prod, idx) => <option key={idx} value={prod}>{prod}</option>);
+            }
+
+            if (selectedScope === 'Regression') {
+                return ['FortiToken', 'FortiToken Cloud']
+                .map((prod, idx) => <option key={idx} value={prod}>{prod}</option>);
+            }
+
+            if (selectedScope === 'Acceptable') {
+                return <option value="FortiGate">FortiGate</option>;
+            }
+
+            return null;
+            })()}
         </Form.Select>
-      </Form.Group>
+        </Form.Group>
+
 
       {/* Select Test Platforms */}
       <Form.Group className="mb-3">

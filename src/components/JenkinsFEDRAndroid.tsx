@@ -18,7 +18,7 @@ import CustomEnvModal from './JenkinsCustomModal';
 import UploadFileModal from './UploadFileModal';
 import TestResultsModal from './JenkinsResultModal';
 
-const JenkinsFTMAndroid: React.FC = () => {
+const JenkinsFEDRAndroid: React.FC = () => {
   const [imageOptions, setImageOptions] = useState<string[]>([]);
   const [selectedImage, setSelectedImage] = useState('');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
@@ -156,4 +156,4 @@ const JenkinsFTMAndroid: React.FC = () => {
   );
 };
 
-export default JenkinsFTMAndroid;
+export default JenkinsFEDRAndroid;
