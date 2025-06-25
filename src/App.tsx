@@ -31,7 +31,7 @@ interface Resource {
 const App: React.FC = () => {
   const [nickname, setNickname] = useState<string>('');
   const [resources, setResources] = useState<Resource[]>([]);
-  const [rememberNickname, setRememberNickname] = useState<boolean>(true);
+  const [rememberNickname] = useState<boolean>(true);
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [os, setOS] = useState<string | null>(null);

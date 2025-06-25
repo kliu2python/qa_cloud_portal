@@ -27,8 +27,6 @@ interface JobInitStatus extends Server {
   errorMsg?: string;
 }
 
-const defaultTags = ['release test', 'unit test', 'dev test', 'integration test'];
-
 const JenkinsCloudSavedJobs: React.FC = () => {
   const [jobs, setJobs] = useState<JobInitStatus[]>([]);
   const [showModal, setShowModal] = useState(false);
@@ -178,6 +176,7 @@ const JenkinsCloudSavedJobs: React.FC = () => {
   };
 
   const filteredJobs = jobs.filter(job => {
+    console.log(job.name.toLowerCase())
     return (!selectedTag || job.tags?.includes(selectedTag)) &&
            job.name.toLowerCase().includes(searchText.toLowerCase());
   });

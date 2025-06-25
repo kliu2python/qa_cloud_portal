@@ -18,16 +18,16 @@ const JenkinsCloudPage: React.FC = () => {
         <Tab eventKey="ftm_android" title="FTM Android">
           <JenkinsFTMAndroid/>
         </Tab>
-        <Tab eventKey="fexp_ios" title="FEXPGO iOS">
+        <Tab eventKey="fexp_ios" title="FEXPGO iOS" disabled>
           <JenkinsFEXPGOiOS/>
         </Tab>
-        <Tab eventKey="fexp_android" title="FEXPGO Android">
+        <Tab eventKey="fexp_android" title="FEXPGO Android" disabled>
           <JenkinsFEXPGOAndroid/>
         </Tab>
-        <Tab eventKey="fedr_ios" title="FEDR iOS">
+        <Tab eventKey="fedr_ios" title="FEDR iOS" disabled>
           <JenkinsFEDRAndroid/>
         </Tab>
-        <Tab eventKey="fedr_android" title="FEDR Android">
+        <Tab eventKey="fedr_android" title="FEDR Android" disabled>
           <JenkinsFEDRiOS/>
         </Tab>
         <Tab eventKey="saved_jobs" title="Saved Jobs">

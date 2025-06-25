@@ -48,18 +48,18 @@ const JenkinsFTMIOS: React.FC = () => {
   const isReadyToRun = selectedEnv && selectedImage && selectedProduct && selectedPlatforms.length > 0;
 
   useEffect(() => {
-    axios.get(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/apk_images`)
+    axios.get(`http://10.160.24.88:31224/api/v1/jenkins_cloud/apk_images`)
       .then(res => setImageOptions(res.data))
       .catch(err => console.error(err));
   }, []);
 
   useEffect(() => {
-    fetchResults();
-  }, []);
+    const interval = setInterval(() => {
+      fetchResults();
+    }, 5 * 60 * 1000);
 
-  useEffect(() => {
-    if (!showToast) fetchResults();
-  }, [showToast]);
+    return () => clearInterval(interval);
+  }, []);
 
   const handlePlatformChange = (platform: string) => {
     setSelectedPlatforms(prev =>
@@ -79,10 +79,11 @@ const JenkinsFTMIOS: React.FC = () => {
     const payload: any = {
       parameters: {
         RUN_STAGE: selectedProduct,
-        docker_tag: selectedImage
+        ftm_ipa_version: selectedImage
       },
       platforms: selectedPlatforms,
-      environment: selectedEnv
+      environment: selectedEnv,
+      custom: setShowCustomEnvModal
     };
 
     if (Object.keys(nonEmptyCustomEnv).length > 0) {
@@ -104,10 +105,25 @@ const JenkinsFTMIOS: React.FC = () => {
       });
   };
 
-  const fetchResults = () => {
-    axios.get(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/run/results/ios/ftm`)
-      .then(res => setTestResultLogs(res.data || []))
-      .catch(err => setTestResultLogs([{ res: `Failed to fetch results: ${err.message}` }]));
+  const fetchResults = async () => {
+    try {
+      const res = await axios.get(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/run/results/ios/ftm`);
+      setTestResultLogs(res.data || []);
+      if (res.status === 200) {
+        setToastMessage('Refresh Completed');
+        setToastVariant('success');
+        setShowToast(true);
+      }
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setTestResultLogs([{ res: `Failed to fetch results: ${err.message}` }]);
+        setToastMessage(`Error: ${err.message}`);
+      } else {
+        setToastMessage('An unknown error occurred');
+      }
+      setToastVariant('danger');
+      setShowToast(true);
+    }
   };
 
   const refreshSingleJob = (jobName: string, index: number) => {
@@ -115,8 +131,22 @@ const JenkinsFTMIOS: React.FC = () => {
     axios.get(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/run/result/ios/ftm?job_name=${jobName}`)
       .then(res => {
         const newLogs = [...testResultLogs];
+        setTestResultLogs(newLogs);
+        setToastMessage('Completed Refresh');
+        fetchResults();
+      })
+      .catch(err => console.error(`Refresh failed for ${jobName}:`, err))
+      .finally(() => setRefreshingIndex(null));
+  };
+
+  const deleteSingleResult = (jobName: string, index: number) => {
+    setRefreshingIndex(index);
+    axios.delete(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/run/result/ios/ftm/delete?job_name=${jobName}`)
+      .then(res => {
+        const newLogs = [...testResultLogs];
         newLogs[index].res = res.data;
         setTestResultLogs(newLogs);
+        fetchResults();
       })
       .catch(err => console.error(`Refresh failed for ${jobName}:`, err))
       .finally(() => setRefreshingIndex(null));
@@ -298,7 +328,10 @@ const JenkinsFTMIOS: React.FC = () => {
         {isSubmitting ? <Spinner animation="border" size="sm" /> : 'Run Job'}
       </Button>
 
-      <Button variant="info" className="ms-2" onClick={() => setShowResultsModal(true)}>
+      <Button variant="info" className="ms-2" onClick={async () => {
+        await fetchResults();
+        setShowResultsModal(true);
+      }}>
         View Test Results
       </Button>
 
@@ -340,6 +373,7 @@ const JenkinsFTMIOS: React.FC = () => {
         onRefreshAll={fetchResults}
         onRefreshSingle={refreshSingleJob}
         refreshingIndex={refreshingIndex}
+        deleteSingleResult={deleteSingleResult}
         />
     </Container>
   );

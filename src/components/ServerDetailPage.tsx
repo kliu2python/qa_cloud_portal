@@ -25,31 +25,34 @@ const JobDetailPage: React.FC = () => {
       try {
         const res = await fetch(`${config.jenkinsCloudUrl}/api/v1/jenkins_cloud/jobs/${jobName}`);
         const data = await res.json();
-        if (data.documents.length > 0) {
-          const doc = data.documents[0];
-          console.log(doc);
-          if (doc.builds && Object.keys(doc.builds).length > 0) {
-            setAutoRunDoc(doc);
-            Object.entries(doc.builds).forEach(([key, build]: [string, any]) => {
-              setBuildStatuses(prev => ({ ...prev, [build.build_num]: 'Loading...' }));
-              refreshBuildStatus(build.build_num);
-            });
-            setLoading(false);
-            return;
-          }
+        if (Object.keys(data).length > 0) {
+          
+            console.log("hello");
+          if (data.documents.length > 0) {
+            const doc = data.documents[0];
+            if (doc.builds && Object.keys(doc.builds).length > 0) {
+              setAutoRunDoc(doc);
+              Object.entries(doc.builds).forEach(([key, build]: [string, any]) => {
+                setBuildStatuses(prev => ({ ...prev, [build.build_num]: 'Loading...' }));
+                refreshBuildStatus(build.build_num);
+              });
+              setLoading(false);
+              return;
+            }
 
-          const parameters = doc.parameters || [];
-          setJobExists(true);
-          setParams(parameters);
-          setInputValues({
-            job_name: jobName,
-            server_ip: doc.server_ip,
-            server_un: doc.server_un,
-            server_pw: doc.server_pw,
-            ...Object.fromEntries(parameters.map((p: any) => [p.name, p.default || '']))
-          });
-        } else {
-          setJobExists(false);
+            const parameters = doc.parameters || [];
+            setJobExists(true);
+            setParams(parameters);
+            setInputValues({
+              job_name: jobName,
+              server_ip: doc.server_ip,
+              server_un: doc.server_un,
+              server_pw: doc.server_pw,
+              ...Object.fromEntries(parameters.map((p: any) => [p.name, p.default || '']))
+            });
+          } else {
+            setJobExists(false);
+          }
         }
       } catch (err) {
         setError('Failed to fetch job data');
