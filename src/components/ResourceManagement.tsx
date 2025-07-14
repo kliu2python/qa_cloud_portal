@@ -68,6 +68,16 @@ const ResourceManagement: React.FC<ResourceManageProps> = ({ nickName }) => {
         '/static/imgs/search3.png',
       ],
     },
+    {
+      name: 'Add Ollama Server into VSCode as code assist',
+      description: 'Step to add the Continus as the code assist to connect with Ollama server as the code assist',
+      link: 'http://172.30.91.194:11434/',
+      introImages: [
+        '/static/imgs/continue1.png',
+        '/static/imgs/continue2.png',
+        '/static/imgs/continue3.png',
+      ],
+    },
     // Add more resources with intro images here
   ];
 
