@@ -50,7 +50,7 @@ const NavigateBar: React.FC = () => {
         onClick={toggleSidebar}
         aria-label="Toggle Sidebar"
       >
-        {isExpanded ? <FaTimes /> : <FaBars />}
+        {isExpanded ? React.createElement(FaTimes as React.FC) : React.createElement(FaBars as React.FC)}
       </button>
 
       {/* Header */}
@@ -70,7 +70,7 @@ const NavigateBar: React.FC = () => {
       {/* Navigation Items */}
       <nav className="sidebar-nav">
         {navItems.map((item) => {
-          const IconComponent = item.icon;
+          const IconComponent = item.icon as React.FC;
           return (
             <Link
               key={item.path}
@@ -78,7 +78,7 @@ const NavigateBar: React.FC = () => {
               className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
               title={!isExpanded ? item.label : ''}
             >
-              <span className="nav-icon"><IconComponent /></span>
+              <span className="nav-icon">{React.createElement(IconComponent)}</span>
               {isExpanded && <span className="nav-label">{item.label}</span>}
             </Link>
           );
