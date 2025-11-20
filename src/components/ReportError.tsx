@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import config from '../config/config';
 
 
 interface ReportErrorProps {
@@ -25,7 +26,7 @@ const ReportError: React.FC<ReportErrorProps> = ({
     }
 
     try {
-      const response = await fetch('https://10.160.83.213:8309/send-error-report', {
+      const response = await fetch(`${config.emailServiceUrl}/send-error-report`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,17 +39,20 @@ const ReportError: React.FC<ReportErrorProps> = ({
         }),
       });
 
-      if (response.ok) {
-        setSuccessMessage('Error report sent successfully!');
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setSuccessMessage('Error report sent successfully! An email has been sent to the QA team.');
         setErrorTitle('');
         setErrorContent('');
         setCategory('Emulator Cloud');
       } else {
-        throw new Error('Failed to send error report');
+        throw new Error(data.error || 'Failed to send error report');
       }
     } catch (error) {
-      setErrorMessage('An error occurred while sending the report. Please try again later.');
-      console.error(error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred';
+      setErrorMessage(`Failed to send report: ${errorMsg}. Please try again later.`);
+      console.error('Error sending report:', error);
     }
   };
 

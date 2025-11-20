@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: email-service-config
+  namespace: default
+  labels:
+    app: email-service
+    component: config
+data:
+  # Server Configuration
+  PORT: "8309"
+
+  # SMTP Configuration (Gmail)
+  SMTP_HOST: "smtp.gmail.com"
+  SMTP_PORT: "587"
+  SMTP_SECURE: "false"
+
+  # Gmail Credentials
+  SMTP_USER: "ftc.automation.time.smoke4@gmail.com"
+  SMTP_PASS: "iyfbuhpeepzydyxg"
+
+  # Email Settings
+  DEFAULT_RECIPIENT: "ljiahao@fortinet.com"
+
+  # CORS Configuration
+  ALLOWED_ORIGINS: "*"
