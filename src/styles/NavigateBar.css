@@ -195,11 +195,124 @@
   margin: 0;
 }
 
+/* User Section */
+.sidebar-user {
+  padding: 1rem 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: auto;
+  animation: fadeIn 0.3s ease;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.user-info.collapsed {
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+.user-info:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.user-info:hover .user-avatar {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.user-details {
+  margin-left: 0.75rem;
+  flex: 1;
+  min-width: 0;
+  animation: fadeIn 0.3s ease;
+}
+
+.user-nickname {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logout-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  border-radius: 12px;
+  color: #fca5a5;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: left;
+}
+
+.logout-button:hover {
+  background: rgba(220, 38, 38, 0.2);
+  border-color: rgba(220, 38, 38, 0.5);
+  color: #fee2e2;
+  transform: translateX(4px);
+}
+
+.logout-button:active {
+  transform: translateX(2px);
+}
+
+.modern-sidebar.collapsed .logout-button {
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+.logout-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  min-width: 20px;
+  transition: all 0.25s ease;
+}
+
+.logout-button:hover .logout-icon {
+  transform: scale(1.1);
+}
+
+.logout-label {
+  margin-left: 0.75rem;
+  white-space: nowrap;
+  animation: fadeIn 0.3s ease;
+}
+
 /* Footer Section */
 .sidebar-footer {
   padding: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: auto;
   animation: fadeIn 0.3s ease;
 }
 

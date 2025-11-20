@@ -141,7 +141,7 @@ const App: React.FC = () => {
     <Router>
       <div className="d-flex">
         {/* Sidebar */}
-        <NavigateBar />
+        <NavigateBar nickname={nickname} onLogout={resetNickname} />
         {/* Main Content */}
         <div className="flex-grow-1">
           <Container fluid>
