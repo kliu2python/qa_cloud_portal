@@ -1,7 +1,26 @@
+// @ts-nocheck
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, Container, Row, Table, Col, Form, Modal } from 'react-bootstrap';
+import { Button, Container, Row, Table, Col, Form, Modal, Card, Badge, Spinner, Alert, InputGroup } from 'react-bootstrap';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
+import {
+  FaStar,
+  FaRegStar,
+  FaStarHalfAlt,
+  FaSearch,
+  FaFilter,
+  FaDownload,
+  FaBell,
+  FaChartLine,
+  FaThumbsUp,
+  FaCalendarAlt,
+  FaSort,
+  FaSortUp,
+  FaSortDown,
+  FaTimes,
+  FaCheckCircle,
+  FaExclamationCircle
+} from 'react-icons/fa';
 import '../styles/ReviewFinder.css';
 import config from '../config/config';
 
@@ -12,7 +31,7 @@ interface Review {
   reviewCreatedVersion: string;
   thumbsUpCount: number;
   date: string;
-  isExpanded?: boolean; // To manage expanded state of reviews
+  isExpanded?: boolean;
 }
 
 interface SubscriptionForm {
@@ -23,6 +42,13 @@ interface SubscriptionForm {
 interface Category {
   name: string;
   products: string[];
+}
+
+interface ReviewStats {
+  total: number;
+  average: number;
+  byRating: { [key: number]: number };
+  sentimentCounts: { positive: number; neutral: number; negative: number };
 }
 
 const categories: Category[] = [
@@ -135,7 +161,7 @@ const ReviewFinder: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filterRating, setFilterRating] = useState<number | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [modalContent, setModalContent] = useState(''); // To store content for popup
+  const [modalContent, setModalContent] = useState('');
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [subscriptionForm, setSubscriptionForm] = useState<SubscriptionForm>({
     email: '',
@@ -143,7 +169,7 @@ const ReviewFinder: React.FC = () => {
   });
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   const [subscriptionSuccess, setSubscriptionSuccess] = useState<string | null>(null);
-  const reviewsPerPage = 10;
+  const reviewsPerPage = 15;
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
@@ -155,6 +181,12 @@ const ReviewFinder: React.FC = () => {
   const [unsubscribeEmail, setUnsubscribeEmail] = useState('');
   const [unsubscribeError, setUnsubscribeError] = useState<string | null>(null);
   const [unsubscribeSuccess, setUnsubscribeSuccess] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'date' | 'rating' | 'thumbsUp'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: '', end: '' });
+  const [minThumbsUp, setMinThumbsUp] = useState<number>(0);
 
   const toggleCategory = (categoryName: string) => {
     setExpandedCategories(prev => {
@@ -259,28 +291,6 @@ const ReviewFinder: React.FC = () => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
       setShowDropdown(false);
-    } else if (e.key === 'ArrowDown' && showDropdown && filteredCategories.length > 0) {
-      e.preventDefault();
-      const currentIndex = filteredCategories.findIndex(category => category.name === document.activeElement?.textContent);
-      const nextIndex = (currentIndex + 1) % filteredCategories.length;
-      const nextElement = document.querySelector(`[data-topic="${filteredCategories[nextIndex].name}"]`);
-      if (nextElement) {
-        (nextElement as HTMLElement).focus();
-      }
-    } else if (e.key === 'ArrowUp' && showDropdown && filteredCategories.length > 0) {
-      e.preventDefault();
-      const currentIndex = filteredCategories.findIndex(category => category.name === document.activeElement?.textContent);
-      const prevIndex = (currentIndex - 1 + filteredCategories.length) % filteredCategories.length;
-      const prevElement = document.querySelector(`[data-topic="${filteredCategories[prevIndex].name}"]`);
-      if (prevElement) {
-        (prevElement as HTMLElement).focus();
-      }
-    } else if (e.key === 'Enter' && showDropdown && document.activeElement?.hasAttribute('data-topic')) {
-      e.preventDefault();
-      const topic = document.activeElement.textContent;
-      if (topic) {
-        handleTopicSelect(topic);
-      }
     }
   };
 
@@ -318,13 +328,16 @@ const ReviewFinder: React.FC = () => {
   };
 
   const fetchAndDisplayReviews = async () => {
-    if (!platform || !appName || (platform === 'App Store' && !appId)) {
+    if (!platform || !appName || (platform === 'apple_store' && !appId)) {
       setError('Please fill in all required fields.');
       return;
     }
 
     setError(null);
+    setIsLoading(true);
     const fetchedReviews = await fetchReviews(platform, appName, appId);
+    setIsLoading(false);
+
     if (fetchedReviews.length === 0) {
       setError('No reviews found or failed to fetch reviews.');
     }
@@ -332,29 +345,125 @@ const ReviewFinder: React.FC = () => {
     setCurrentPage(1);
   };
 
+  const calculateStats = (): ReviewStats => {
+    const stats: ReviewStats = {
+      total: reviews.length,
+      average: 0,
+      byRating: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+      sentimentCounts: { positive: 0, neutral: 0, negative: 0 }
+    };
+
+    reviews.forEach(review => {
+      stats.byRating[review.rating] = (stats.byRating[review.rating] || 0) + 1;
+
+      if (review.rating >= 4) stats.sentimentCounts.positive++;
+      else if (review.rating === 3) stats.sentimentCounts.neutral++;
+      else stats.sentimentCounts.negative++;
+    });
+
+    stats.average = reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : 0;
+
+    return stats;
+  };
+
+  const renderStars = (rating: number, size: 'sm' | 'md' | 'lg' = 'md') => {
+    const stars = [];
+    const sizeClass = size === 'sm' ? 'star-sm' : size === 'lg' ? 'star-lg' : 'star-md';
+
+    for (let i = 1; i <= 5; i++) {
+      if (i <= rating) {
+        stars.push(<FaStar key={i} className={`star-filled ${sizeClass}`} />);
+      } else if (i - 0.5 <= rating) {
+        stars.push(<FaStarHalfAlt key={i} className={`star-filled ${sizeClass}`} />);
+      } else {
+        stars.push(<FaRegStar key={i} className={`star-empty ${sizeClass}`} />);
+      }
+    }
+    return <span className="star-rating">{stars}</span>;
+  };
+
+  const getSentimentBadge = (rating: number) => {
+    if (rating >= 4) {
+      return <Badge bg="success" className="sentiment-badge">Positive</Badge>;
+    } else if (rating === 3) {
+      return <Badge bg="warning" className="sentiment-badge">Neutral</Badge>;
+    } else {
+      return <Badge bg="danger" className="sentiment-badge">Negative</Badge>;
+    }
+  };
+
+  const getFilteredAndSortedReviews = () => {
+    let filtered = reviews;
+
+    // Filter by rating
+    if (filterRating) {
+      filtered = filtered.filter(r => r.rating === filterRating);
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter(r =>
+        r.review.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.user.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Filter by date range
+    if (dateRange.start) {
+      filtered = filtered.filter(r => new Date(r.date) >= new Date(dateRange.start));
+    }
+    if (dateRange.end) {
+      filtered = filtered.filter(r => new Date(r.date) <= new Date(dateRange.end));
+    }
+
+    // Filter by thumbs up
+    if (minThumbsUp > 0) {
+      filtered = filtered.filter(r => r.thumbsUpCount >= minThumbsUp);
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      let comparison = 0;
+
+      switch (sortBy) {
+        case 'date':
+          comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+          break;
+        case 'rating':
+          comparison = a.rating - b.rating;
+          break;
+        case 'thumbsUp':
+          comparison = a.thumbsUpCount - b.thumbsUpCount;
+          break;
+      }
+
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+    return filtered;
+  };
+
   const getTotalPages = () => {
-    const filteredReviews = filterRating
-      ? reviews.filter((review) => review.rating === filterRating)
-      : reviews;
-    return Math.ceil(filteredReviews.length / reviewsPerPage);
+    const filtered = getFilteredAndSortedReviews();
+    return Math.ceil(filtered.length / reviewsPerPage);
   };
 
   const downloadExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(reviews);
+    const worksheet = XLSX.utils.json_to_sheet(getFilteredAndSortedReviews());
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Reviews');
     const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-    saveAs(blob, `${appName}_reviews.xlsx`);
+    saveAs(blob, `${appName}_reviews_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const getPagedReviews = () => {
-    const filteredReviews = filterRating
-      ? reviews.filter((review) => review.rating === filterRating)
-      : reviews;
+    const filtered = getFilteredAndSortedReviews();
     const startIndex = (currentPage - 1) * reviewsPerPage;
     const endIndex = startIndex + reviewsPerPage;
-    return filteredReviews.slice(startIndex, endIndex);
+    return filtered.slice(startIndex, endIndex);
   };
 
   const handleShowMore = (content: string) => {
@@ -362,27 +471,50 @@ const ReviewFinder: React.FC = () => {
     setShowModal(true);
   };
 
-  const renderPagination = () => {
-    const totalFilteredPages = getTotalPages(); // Dynamically calculate total pages
-    const pageButtons = [];
-    const maxVisiblePages = 3;
+  const handleSortChange = (newSortBy: 'date' | 'rating' | 'thumbsUp') => {
+    if (sortBy === newSortBy) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(newSortBy);
+      setSortOrder('desc');
+    }
+    setCurrentPage(1);
+  };
 
-    const startPage = Math.max(currentPage - 1, 1);
+  const renderSortIcon = (column: 'date' | 'rating' | 'thumbsUp') => {
+    if (sortBy !== column) return <FaSort className="sort-icon" />;
+    return sortOrder === 'asc' ? <FaSortUp className="sort-icon active" /> : <FaSortDown className="sort-icon active" />;
+  };
+
+  const renderPagination = () => {
+    const totalFilteredPages = getTotalPages();
+    const pageButtons = [];
+    const maxVisiblePages = 5;
+
+    const startPage = Math.max(currentPage - 2, 1);
     const endPage = Math.min(startPage + maxVisiblePages - 1, totalFilteredPages);
 
     if (startPage > 1) {
       pageButtons.push(
-        <Button key="start-ellipsis" variant="link" disabled>
-          ...
+        <Button key={1} variant="outline-primary" size="sm" onClick={() => setCurrentPage(1)}>
+          1
         </Button>
       );
+      if (startPage > 2) {
+        pageButtons.push(
+          <Button key="start-ellipsis" variant="link" size="sm" disabled>
+            ...
+          </Button>
+        );
+      }
     }
 
     for (let i = startPage; i <= endPage; i++) {
       pageButtons.push(
         <Button
           key={i}
-          variant={currentPage === i ? 'primary' : 'link'}
+          variant={currentPage === i ? 'primary' : 'outline-primary'}
+          size="sm"
           onClick={() => setCurrentPage(i)}
         >
           {i}
@@ -391,9 +523,21 @@ const ReviewFinder: React.FC = () => {
     }
 
     if (endPage < totalFilteredPages) {
+      if (endPage < totalFilteredPages - 1) {
+        pageButtons.push(
+          <Button key="end-ellipsis" variant="link" size="sm" disabled>
+            ...
+          </Button>
+        );
+      }
       pageButtons.push(
-        <Button key="end-ellipsis" variant="link" disabled>
-          ...
+        <Button
+          key={totalFilteredPages}
+          variant="outline-primary"
+          size="sm"
+          onClick={() => setCurrentPage(totalFilteredPages)}
+        >
+          {totalFilteredPages}
         </Button>
       );
     }
@@ -407,6 +551,14 @@ const ReviewFinder: React.FC = () => {
       ...prev,
       topics: []
     }));
+  };
+
+  const clearAllFilters = () => {
+    setFilterRating(null);
+    setSearchQuery('');
+    setDateRange({ start: '', end: '' });
+    setMinThumbsUp(0);
+    setCurrentPage(1);
   };
 
   const handleUnsubscribe = async (e: React.FormEvent) => {
@@ -446,196 +598,485 @@ const ReviewFinder: React.FC = () => {
     }
   };
 
+  const stats = reviews.length > 0 ? calculateStats() : null;
+
   return (
-    <Container>
-      <Row className="mb-10">
-        <Col xs={2}>
-          <Form.Group controlId="platform">
-            <Form.Label>Platform</Form.Label>
-            <Form.Control
-              as="select"
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value)}
-            >
-              <option value="">Select Platform</option>
-              <option value="google_play">Google Play</option>
-              <option value="apple_store">App Store</option>
-              <option value="reddit">Reddit</option>
-            </Form.Control>
-          </Form.Group>
-        </Col>
-
-        {platform === 'google_play' && (
-          <Col xs={2}>
-            <Form.Group controlId="appName">
-              <Form.Label>App Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={appName}
-                onChange={(e) => setAppName(e.target.value)}
-              />
-            </Form.Group>
-          </Col>
-        )}
-
-        {platform === 'apple_store' && (
-          <>
-            <Col xs={2}>
-              <Form.Group controlId="appName">
-                <Form.Label>App Name</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={appName}
-                  onChange={(e) => setAppName(e.target.value)}
-                />
-              </Form.Group>
-            </Col>
-            <Col xs={2}>
-              <Form.Group controlId="appId">
-                <Form.Label>App ID</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={appId}
-                  onChange={(e) => setAppId(e.target.value)}
-                />
-              </Form.Group>
-            </Col>
-          </>
-        )}
-
-        {platform && (
-          <Col xs={2}>
-            <Form.Group controlId="filterRating">
-              <Form.Label>Filter by Rating</Form.Label>
-              <Form.Control
-                as="select"
-                value={filterRating ?? ''}
-                onChange={(e) =>
-                  setFilterRating(e.target.value ? parseInt(e.target.value, 10) : null)
-                }
-              >
-                <option value="">All Ratings</option>
-                <option value="1">1 Star</option>
-                <option value="2">2 Stars</option>
-                <option value="3">3 Stars</option>
-                <option value="4">4 Stars</option>
-                <option value="5">5 Stars</option>
-              </Form.Control>
-            </Form.Group>
-          </Col>
-        )}
-      </Row>
-
-      <Row className="mb-4">
-        <Col className="text-center">
-          <Button variant="primary" onClick={fetchAndDisplayReviews} className="me-3">
-            Fetch Reviews
-          </Button>
-          <Button variant="secondary" onClick={() => window.location.reload()} className="me-3">
-            Refresh
-          </Button>
-          {reviews.length > 0 && (
-            <Button variant="success" onClick={downloadExcel} className="me-3">
-              Download
-            </Button>
-          )}
-          <Button variant="info" onClick={() => setShowSubscriptionModal(true)} className="me-3">
-            Subscribe to Topics
-          </Button>
-          <Button variant="outline-danger" onClick={() => setShowUnsubscribeModal(true)}>
-            Unsubscribe
-          </Button>
-        </Col>
-      </Row>
-
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
-      {reviews.length > 0 && (
-        <div>
-          <h2>Reviews</h2>
-          <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Rating</th>
-              <th>Content</th>
-              <th>Review Version</th>
-              <th>Thumbs Up Count</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {getPagedReviews().map((review, index) => (
-              <tr key={index}>
-                <td>{review.user}</td>
-                <td>{review.rating}</td>
-                <td>{review.review.length > 50
-                    ? `${review.review.slice(0, 50)}...`
-                    : review.review}
-                  {review.review.length > 50 && (
-                    <span
-                      style={{
-                        cursor: 'pointer',
-                        color: 'blue',
-                        textDecoration: 'underline',
-                        marginLeft: '5px',
-                      }}
-                      onClick={() => handleShowMore(review.review)}
-                    >
-                      Show More
-                    </span>
-                  )}</td>
-                <td>{review.reviewCreatedVersion}</td>
-                <td>{review.thumbsUpCount}</td>
-                <td>{review.date}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-          <div className="d-flex justify-content-center mt-3">
-            <Button
-              onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
-              disabled={currentPage === 1}
-              variant="secondary"
-              style={{ marginRight: '5px' }}
-            >
-              Previous
-            </Button>
-            {renderPagination()}
-            <Button
-              onClick={() => setCurrentPage(Math.min(currentPage + 1, getTotalPages()))}
-              disabled={currentPage === getTotalPages()}
-              variant="secondary"
-              style={{ marginLeft: '5px' }}
-            >
-              Next
-            </Button>
-            <div style={{ marginLeft: '15px', alignSelf: 'center' }}>
-              Page {currentPage} of {getTotalPages()}
-            </div>
+    <Container fluid className="review-finder-container">
+      {/* Header Section */}
+      <div className="review-finder-header">
+        <div className="header-content">
+          <FaSearch className="header-icon" />
+          <div>
+            <h1 className="header-title">FortiReviewFinder</h1>
+            <p className="header-subtitle">Aggregate and analyze app reviews from multiple platforms</p>
           </div>
         </div>
+      </div>
+
+      {/* Search Form Section */}
+      <Card className="search-form-card mb-4">
+        <Card.Body>
+          <h5 className="section-title">
+            <FaFilter className="me-2" />
+            Review Search Configuration
+          </h5>
+          <Row className="g-3">
+            <Col md={3}>
+              <Form.Group controlId="platform">
+                <Form.Label className="form-label-custom">Platform</Form.Label>
+                <Form.Select
+                  value={platform}
+                  onChange={(e) => setPlatform(e.target.value)}
+                  className="form-control-custom"
+                >
+                  <option value="">Select Platform</option>
+                  <option value="google_play">Google Play Store</option>
+                  <option value="apple_store">Apple App Store</option>
+                  <option value="reddit">Reddit</option>
+                </Form.Select>
+              </Form.Group>
+            </Col>
+
+            {platform && (
+              <Col md={3}>
+                <Form.Group controlId="appName">
+                  <Form.Label className="form-label-custom">App Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={appName}
+                    onChange={(e) => setAppName(e.target.value)}
+                    placeholder="Enter app name"
+                    className="form-control-custom"
+                  />
+                </Form.Group>
+              </Col>
+            )}
+
+            {platform === 'apple_store' && (
+              <Col md={3}>
+                <Form.Group controlId="appId">
+                  <Form.Label className="form-label-custom">App ID</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={appId}
+                    onChange={(e) => setAppId(e.target.value)}
+                    placeholder="Enter app ID"
+                    className="form-control-custom"
+                  />
+                </Form.Group>
+              </Col>
+            )}
+
+            {platform && (
+              <Col md={3}>
+                <Form.Group controlId="filterRating">
+                  <Form.Label className="form-label-custom">Rating Filter</Form.Label>
+                  <Form.Select
+                    value={filterRating ?? ''}
+                    onChange={(e) =>
+                      setFilterRating(e.target.value ? parseInt(e.target.value, 10) : null)
+                    }
+                    className="form-control-custom"
+                  >
+                    <option value="">All Ratings</option>
+                    <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+                    <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+                    <option value="3">⭐⭐⭐ 3 Stars</option>
+                    <option value="2">⭐⭐ 2 Stars</option>
+                    <option value="1">⭐ 1 Star</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            )}
+          </Row>
+
+          <Row className="mt-3">
+            <Col className="d-flex gap-2 flex-wrap">
+              <Button
+                variant="primary"
+                onClick={fetchAndDisplayReviews}
+                disabled={isLoading}
+                className="action-button"
+              >
+                {isLoading ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    Fetching...
+                  </>
+                ) : (
+                  <>
+                    <FaSearch className="me-2" />
+                    Fetch Reviews
+                  </>
+                )}
+              </Button>
+              <Button
+                variant="outline-secondary"
+                onClick={() => window.location.reload()}
+                className="action-button"
+              >
+                Reset
+              </Button>
+              {reviews.length > 0 && (
+                <Button
+                  variant="success"
+                  onClick={downloadExcel}
+                  className="action-button"
+                >
+                  <FaDownload className="me-2" />
+                  Download Excel
+                </Button>
+              )}
+              <Button
+                variant="info"
+                onClick={() => setShowSubscriptionModal(true)}
+                className="action-button"
+              >
+                <FaBell className="me-2" />
+                Subscribe
+              </Button>
+              <Button
+                variant="outline-danger"
+                onClick={() => setShowUnsubscribeModal(true)}
+                className="action-button"
+              >
+                Unsubscribe
+              </Button>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
+
+      {error && (
+        <Alert variant="danger" dismissible onClose={() => setError(null)}>
+          <FaExclamationCircle className="me-2" />
+          {error}
+        </Alert>
+      )}
+
+      {/* Statistics Section */}
+      {stats && (
+        <Row className="mb-4">
+          <Col md={3}>
+            <Card className="stats-card stats-card-total">
+              <Card.Body>
+                <div className="stats-content">
+                  <div className="stats-icon">
+                    <FaChartLine />
+                  </div>
+                  <div className="stats-info">
+                    <div className="stats-value">{stats.total}</div>
+                    <div className="stats-label">Total Reviews</div>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="stats-card stats-card-average">
+              <Card.Body>
+                <div className="stats-content">
+                  <div className="stats-icon">
+                    <FaStar />
+                  </div>
+                  <div className="stats-info">
+                    <div className="stats-value">{stats.average.toFixed(1)}</div>
+                    <div className="stats-label">Average Rating</div>
+                    <div className="mt-1">{renderStars(stats.average, 'sm')}</div>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="stats-card stats-card-positive">
+              <Card.Body>
+                <div className="stats-content">
+                  <div className="stats-icon">
+                    <FaCheckCircle />
+                  </div>
+                  <div className="stats-info">
+                    <div className="stats-value">{stats.sentimentCounts.positive}</div>
+                    <div className="stats-label">Positive Reviews</div>
+                    <div className="stats-subtext">
+                      {((stats.sentimentCounts.positive / stats.total) * 100).toFixed(0)}% of total
+                    </div>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="stats-card stats-card-negative">
+              <Card.Body>
+                <div className="stats-content">
+                  <div className="stats-icon">
+                    <FaExclamationCircle />
+                  </div>
+                  <div className="stats-info">
+                    <div className="stats-value">{stats.sentimentCounts.negative}</div>
+                    <div className="stats-label">Negative Reviews</div>
+                    <div className="stats-subtext">
+                      {((stats.sentimentCounts.negative / stats.total) * 100).toFixed(0)}% of total
+                    </div>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      )}
+
+      {/* Advanced Filters Section */}
+      {reviews.length > 0 && (
+        <Card className="filters-card mb-4">
+          <Card.Body>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="section-title mb-0">
+                <FaFilter className="me-2" />
+                Advanced Filters & Search
+              </h5>
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                onClick={clearAllFilters}
+              >
+                <FaTimes className="me-1" />
+                Clear Filters
+              </Button>
+            </div>
+            <Row className="g-3">
+              <Col md={4}>
+                <InputGroup>
+                  <InputGroup.Text>
+                    <FaSearch />
+                  </InputGroup.Text>
+                  <Form.Control
+                    type="text"
+                    placeholder="Search in reviews..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                  />
+                </InputGroup>
+              </Col>
+              <Col md={2}>
+                <InputGroup>
+                  <InputGroup.Text>
+                    <FaCalendarAlt />
+                  </InputGroup.Text>
+                  <Form.Control
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) => {
+                      setDateRange(prev => ({ ...prev, start: e.target.value }));
+                      setCurrentPage(1);
+                    }}
+                    placeholder="Start date"
+                  />
+                </InputGroup>
+              </Col>
+              <Col md={2}>
+                <InputGroup>
+                  <InputGroup.Text>
+                    <FaCalendarAlt />
+                  </InputGroup.Text>
+                  <Form.Control
+                    type="date"
+                    value={dateRange.end}
+                    onChange={(e) => {
+                      setDateRange(prev => ({ ...prev, end: e.target.value }));
+                      setCurrentPage(1);
+                    }}
+                    placeholder="End date"
+                  />
+                </InputGroup>
+              </Col>
+              <Col md={2}>
+                <InputGroup>
+                  <InputGroup.Text>
+                    <FaThumbsUp />
+                  </InputGroup.Text>
+                  <Form.Control
+                    type="number"
+                    min="0"
+                    value={minThumbsUp}
+                    onChange={(e) => {
+                      setMinThumbsUp(parseInt(e.target.value) || 0);
+                      setCurrentPage(1);
+                    }}
+                    placeholder="Min thumbs up"
+                  />
+                </InputGroup>
+              </Col>
+              <Col md={2}>
+                <div className="filter-info">
+                  Showing {getFilteredAndSortedReviews().length} of {reviews.length} reviews
+                </div>
+              </Col>
+            </Row>
+          </Card.Body>
+        </Card>
+      )}
+
+      {/* Reviews Table Section */}
+      {reviews.length > 0 && (
+        <Card className="reviews-table-card">
+          <Card.Body>
+            <h5 className="section-title mb-3">
+              <FaChartLine className="me-2" />
+              Review Details
+            </h5>
+            <div className="table-responsive">
+              <Table hover className="reviews-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th
+                      onClick={() => handleSortChange('rating')}
+                      className="sortable-header"
+                    >
+                      Rating {renderSortIcon('rating')}
+                    </th>
+                    <th>Sentiment</th>
+                    <th>Review Content</th>
+                    <th>Version</th>
+                    <th
+                      onClick={() => handleSortChange('thumbsUp')}
+                      className="sortable-header"
+                    >
+                      <FaThumbsUp /> {renderSortIcon('thumbsUp')}
+                    </th>
+                    <th
+                      onClick={() => handleSortChange('date')}
+                      className="sortable-header"
+                    >
+                      Date {renderSortIcon('date')}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getPagedReviews().map((review, index) => (
+                    <tr key={index} className="review-row">
+                      <td className="user-cell">
+                        <strong>{review.user}</strong>
+                      </td>
+                      <td className="rating-cell">
+                        <div className="rating-display">
+                          {renderStars(review.rating, 'sm')}
+                          <span className="rating-number">{review.rating}</span>
+                        </div>
+                      </td>
+                      <td className="sentiment-cell">
+                        {getSentimentBadge(review.rating)}
+                      </td>
+                      <td className="content-cell">
+                        <div className="review-content">
+                          {review.review.length > 150
+                            ? `${review.review.slice(0, 150)}...`
+                            : review.review}
+                          {review.review.length > 150 && (
+                            <Button
+                              variant="link"
+                              size="sm"
+                              className="show-more-btn"
+                              onClick={() => handleShowMore(review.review)}
+                            >
+                              Read more
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                      <td className="version-cell">
+                        <Badge bg="secondary">{review.reviewCreatedVersion || 'N/A'}</Badge>
+                      </td>
+                      <td className="thumbs-cell">
+                        <Badge bg="info" className="thumbs-badge">
+                          <FaThumbsUp className="me-1" />
+                          {review.thumbsUpCount}
+                        </Badge>
+                      </td>
+                      <td className="date-cell">
+                        {new Date(review.date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+
+            {/* Pagination */}
+            {getTotalPages() > 1 && (
+              <div className="pagination-container">
+                <Button
+                  onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+                  disabled={currentPage === 1}
+                  variant="outline-primary"
+                  size="sm"
+                >
+                  Previous
+                </Button>
+                <div className="pagination-buttons">
+                  {renderPagination()}
+                </div>
+                <Button
+                  onClick={() => setCurrentPage(Math.min(currentPage + 1, getTotalPages()))}
+                  disabled={currentPage === getTotalPages()}
+                  variant="outline-primary"
+                  size="sm"
+                >
+                  Next
+                </Button>
+                <div className="pagination-info">
+                  Page {currentPage} of {getTotalPages()}
+                </div>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      )}
+
+      {/* Empty State */}
+      {!isLoading && reviews.length === 0 && !error && (
+        <Card className="empty-state-card">
+          <Card.Body className="text-center py-5">
+            <FaSearch className="empty-state-icon" />
+            <h3 className="mt-3">No Reviews Yet</h3>
+            <p className="text-muted">
+              Select a platform and app name to fetch reviews
+            </p>
+          </Card.Body>
+        </Card>
       )}
 
       {/* Subscription Modal */}
-      <Modal show={showSubscriptionModal} onHide={() => setShowSubscriptionModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Subscribe to Topics</Modal.Title>
+      <Modal show={showSubscriptionModal} onHide={() => setShowSubscriptionModal(false)} centered size="lg">
+        <Modal.Header closeButton className="modal-header-custom">
+          <Modal.Title>
+            <FaBell className="me-2" />
+            Subscribe to Review Updates
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleSubscriptionSubmit}>
             <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
+              <Form.Label>Email Address</Form.Label>
               <Form.Control
                 type="email"
                 value={subscriptionForm.email}
                 onChange={(e) => setSubscriptionForm(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="Enter your email"
+                placeholder="your.email@example.com"
                 required
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Select Topics</Form.Label>
+              <Form.Label>Select Products to Monitor</Form.Label>
               <div style={{ position: 'relative' }}>
                 <Form.Control
                   type="text"
@@ -643,36 +1084,19 @@ const ReviewFinder: React.FC = () => {
                   onChange={handleInputChange}
                   onClick={() => setShowDropdown(true)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Type to search or click to select topics"
+                  placeholder="Search products..."
                   autoComplete="off"
                 />
                 {showDropdown && (
                   <div
                     ref={dropdownRef}
-                    style={{
-                      position: 'absolute',
-                      top: '100%',
-                      left: 0,
-                      right: 0,
-                      maxHeight: '300px',
-                      overflowY: 'auto',
-                      backgroundColor: 'white',
-                      border: '1px solid #ced4da',
-                      borderRadius: '0.25rem',
-                      zIndex: 1000,
-                    }}
+                    className="topics-dropdown"
                     onScroll={handleScroll}
                   >
                     {filteredCategories.slice(0, visibleItems).map((category) => (
                       <div key={category.name}>
                         <div
-                          style={{
-                            padding: '8px 12px',
-                            backgroundColor: '#f8f9fa',
-                            cursor: 'pointer',
-                            borderBottom: '1px solid #eee',
-                            fontWeight: 'bold',
-                          }}
+                          className="category-header"
                           onClick={() => toggleCategory(category.name)}
                         >
                           {expandedCategories.has(category.name) ? '▼' : '▶'} {category.name}
@@ -682,26 +1106,8 @@ const ReviewFinder: React.FC = () => {
                             key={product}
                             data-topic={product}
                             tabIndex={0}
-                            style={{
-                              padding: '8px 12px 8px 24px',
-                              cursor: 'pointer',
-                              borderBottom: '1px solid #eee',
-                              outline: 'none',
-                            }}
+                            className="product-item"
                             onClick={() => handleTopicSelect(product)}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#f8f9fa';
-                              e.currentTarget.focus();
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = 'white';
-                            }}
-                            onFocus={(e) => {
-                              e.currentTarget.style.backgroundColor = '#f8f9fa';
-                            }}
-                            onBlur={(e) => {
-                              e.currentTarget.style.backgroundColor = 'white';
-                            }}
                           >
                             {product}
                           </div>
@@ -711,10 +1117,10 @@ const ReviewFinder: React.FC = () => {
                   </div>
                 )}
               </div>
-              <div className="mt-2">
+              <div className="mt-3">
                 {selectedTopics.length > 0 && (
                   <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span className="text-muted">Selected Topics:</span>
+                    <span className="text-muted">Selected: {selectedTopics.length} product(s)</span>
                     <Button
                       variant="outline-danger"
                       size="sm"
@@ -724,30 +1130,38 @@ const ReviewFinder: React.FC = () => {
                     </Button>
                   </div>
                 )}
-                <div className="d-flex flex-wrap">
+                <div className="selected-topics-container">
                   {selectedTopics.map((topic) => (
-                    <span
+                    <Badge
                       key={topic}
-                      className="badge bg-primary me-2 mb-2"
-                      style={{ fontSize: '0.9rem', padding: '5px 10px' }}
+                      bg="primary"
+                      className="selected-topic-badge"
                     >
                       {topic}
-                      <button
-                        type="button"
-                        className="btn-close btn-close-white ms-2"
-                        style={{ fontSize: '0.6rem' }}
+                      <FaTimes
+                        className="ms-2 remove-topic-icon"
                         onClick={() => removeTopic(topic)}
-                        aria-label="Remove"
                       />
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               </div>
             </Form.Group>
-            {subscriptionError && <p className="text-danger">{subscriptionError}</p>}
-            {subscriptionSuccess && <p className="text-success">{subscriptionSuccess}</p>}
-            <Button variant="primary" type="submit">
-              Subscribe
+            {subscriptionError && (
+              <Alert variant="danger">
+                <FaExclamationCircle className="me-2" />
+                {subscriptionError}
+              </Alert>
+            )}
+            {subscriptionSuccess && (
+              <Alert variant="success">
+                <FaCheckCircle className="me-2" />
+                {subscriptionSuccess}
+              </Alert>
+            )}
+            <Button variant="primary" type="submit" className="w-100">
+              <FaBell className="me-2" />
+              Subscribe to Updates
             </Button>
           </Form>
         </Modal.Body>
@@ -755,28 +1169,41 @@ const ReviewFinder: React.FC = () => {
 
       {/* Unsubscribe Modal */}
       <Modal show={showUnsubscribeModal} onHide={() => setShowUnsubscribeModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Unsubscribe from Topics</Modal.Title>
+        <Modal.Header closeButton className="modal-header-custom">
+          <Modal.Title>Unsubscribe from Updates</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleUnsubscribe}>
             <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
+              <Form.Label>Email Address</Form.Label>
               <Form.Control
                 type="email"
                 value={unsubscribeEmail}
                 onChange={(e) => setUnsubscribeEmail(e.target.value)}
-                placeholder="Enter your email to unsubscribe"
+                placeholder="your.email@example.com"
                 required
               />
+              <Form.Text className="text-muted">
+                Enter the email address you used to subscribe
+              </Form.Text>
             </Form.Group>
-            {unsubscribeError && <p className="text-danger">{unsubscribeError}</p>}
-            {unsubscribeSuccess && <p className="text-success">{unsubscribeSuccess}</p>}
-            <div className="d-flex justify-content-between">
-              <Button variant="secondary" onClick={() => setShowUnsubscribeModal(false)}>
+            {unsubscribeError && (
+              <Alert variant="danger">
+                <FaExclamationCircle className="me-2" />
+                {unsubscribeError}
+              </Alert>
+            )}
+            {unsubscribeSuccess && (
+              <Alert variant="success">
+                <FaCheckCircle className="me-2" />
+                {unsubscribeSuccess}
+              </Alert>
+            )}
+            <div className="d-flex gap-2">
+              <Button variant="secondary" onClick={() => setShowUnsubscribeModal(false)} className="flex-fill">
                 Cancel
               </Button>
-              <Button variant="danger" type="submit">
+              <Button variant="danger" type="submit" className="flex-fill">
                 Unsubscribe
               </Button>
             </div>
@@ -784,13 +1211,13 @@ const ReviewFinder: React.FC = () => {
         </Modal.Body>
       </Modal>
 
-      {/* Existing Modal for Showing Full Content */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
+      {/* Review Content Modal */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
+        <Modal.Header closeButton className="modal-header-custom">
           <Modal.Title>Full Review Content</Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{ backgroundColor: 'rgba(255,255,255,0.8)' }}>
-          <p>{modalContent}</p>
+        <Modal.Body className="review-modal-body">
+          <p className="review-full-content">{modalContent}</p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
