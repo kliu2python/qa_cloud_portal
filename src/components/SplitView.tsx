@@ -116,7 +116,7 @@ const SplitView: React.FC<SplitViewProps> = ({ resource, launchVNC, onGoBack }) 
       {/* VNC View */}
       <div style={{ flex: 1, padding: '10px' }}>
         <iframe
-          src={`http://10.160.24.88:${resource.vnc_port}/?password=fortinet`}
+          src={`https://10.160.24.88:${resource.vnc_port}/?password=fortinet`}
           width="100%"
           height="100%"
           style={{ border: 'none' }}

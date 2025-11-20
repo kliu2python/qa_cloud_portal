@@ -18,7 +18,7 @@ const ResourceManagement: React.FC<ResourceManageProps> = ({ nickName }) => {
     {
       name: 'Jupyter Server',
       description: 'Access and manage files on the NFS share via the Jupyter Lab interface',
-      link: 'http://10.160.13.30:8888/lab/workspaces/auto-o/tree/apks',
+      link: 'https://10.160.13.30:8888/lab/workspaces/auto-o/tree/apks',
       introImages: [
         '/static/imgs/jupyter1.png',
         '/static/imgs/jupyter2.png',
@@ -28,7 +28,7 @@ const ResourceManagement: React.FC<ResourceManageProps> = ({ nickName }) => {
     {
       name: 'Jenkins Server',
       description: 'Manage continuous integration pipelines and job executions on the Jenkins server',
-      link: 'http://10.160.13.30:8080/job/mobile_test/',
+      link: 'https://10.160.13.30:8080/job/mobile_test/',
       introImages: [
         '/static/imgs/jenkins1.png',
         '/static/imgs/jenkins2.png',
@@ -38,7 +38,7 @@ const ResourceManagement: React.FC<ResourceManageProps> = ({ nickName }) => {
     {
       name: 'Android Device Farm',
       description: 'Remotely access and manage Android devices for testing on the Android Device Farm',
-      link: 'http://10.160.13.230:7100/#!/devices',
+      link: 'https://10.160.13.230:7100/#!/devices',
       introImages: [
         '/static/imgs/stf1.png',
         '/static/imgs/stf2.png',
@@ -48,7 +48,7 @@ const ResourceManagement: React.FC<ResourceManageProps> = ({ nickName }) => {
     {
       name: 'iOS Device Farm',
       description: 'Remotely access and manage iOS devices for testing on the iOS Device Farm',
-      link: 'http://10.160.13.112:9000/',
+      link: 'https://10.160.13.112:9000/',
       introImages: [
         '/static/imgs/idf1.png',
         '/static/imgs/idf2.png',
@@ -58,7 +58,7 @@ const ResourceManagement: React.FC<ResourceManageProps> = ({ nickName }) => {
     {
       name: 'Failure Test Cases Screenshot Search',
       description: 'Search for and manage failure test case screenshots on the failure test case management system',
-      link: 'http://10.160.24.88:31085',
+      link: 'https://10.160.24.88:31085',
       introImages: [
         '/static/imgs/search1.png',
         '/static/imgs/search2.png',

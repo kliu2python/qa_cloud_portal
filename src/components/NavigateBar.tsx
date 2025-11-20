@@ -1,40 +1,89 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import {
+  FaHome,
+  FaMobileAlt,
+  FaChrome,
+  FaJenkins,
+  FaSearch,
+  FaChartBar,
+  FaBug,
+  FaBars,
+  FaTimes
+} from 'react-icons/fa';
+import { IconType } from 'react-icons';
+import '../styles/NavigateBar.css';
+
+interface NavItem {
+  path: string;
+  label: string;
+  icon: IconType;
+}
 
 const NavigateBar: React.FC = () => {
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  const location = useLocation();
+
+  const navItems: NavItem[] = [
+    { path: '/', label: 'Home', icon: FaHome },
+    { path: '/emulator-cloud', label: 'Emulator Cloud', icon: FaMobileAlt },
+    { path: '/browser-cloud', label: 'Browser Cloud', icon: FaChrome },
+    { path: '/jenkins-cloud', label: 'Jenkins Cloud', icon: FaJenkins },
+    { path: '/reviewfinder', label: 'FortiReviewFinder', icon: FaSearch },
+    { path: '/resource', label: 'Resource Dashboard', icon: FaChartBar },
+    { path: '/report-error', label: 'Report an Issue', icon: FaBug },
+  ];
+
+  const toggleSidebar = () => {
+    setIsExpanded(!isExpanded);
+  };
+
+  const isActive = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
-    <div
-      className="bg-dark text-white d-flex flex-column justify-content-between p-3"
-      style={{ width: '250px', minHeight: '100vh' }}
-    >
+    <div className={`modern-sidebar ${isExpanded ? 'expanded' : 'collapsed'}`}>
+      {/* Toggle Button */}
+      <button
+        className="sidebar-toggle"
+        onClick={toggleSidebar}
+        aria-label="Toggle Sidebar"
+      >
+        {isExpanded ? <FaTimes /> : <FaBars />}
+      </button>
+
       {/* Header */}
-      <div>
-        <div className="text-center mb-4">
-          <h3 className="mb-1">TaaS</h3>
-          <h6 className="mb-1">Test as a Service</h6>
+      <div className="sidebar-header">
+        <div className="sidebar-brand">
+          {isExpanded ? (
+            <>
+              <h3 className="brand-title">TaaS</h3>
+              <p className="brand-subtitle">Test as a Service</p>
+            </>
+          ) : (
+            <h3 className="brand-title-collapsed">T</h3>
+          )}
         </div>
-        <Link to="/" className="btn btn-outline-light d-block mb-3">
-          Home
-        </Link>
-        <Link to="/emulator-cloud" className="btn btn-outline-light d-block mb-3">
-          Emulator Cloud
-        </Link>
-        <Link to="/browser-cloud" className="btn btn-outline-light d-block mb-3">
-          Browser Cloud
-        </Link>
-        <Link to="/jenkins-cloud" className="btn btn-outline-light d-block mb-3">
-          Jenkins Cloud
-        </Link>
-        <Link to="/reviewfinder" className="btn btn-outline-light d-block mb-3">
-          FortiReviewFinder
-        </Link>
-        <Link to="/resource" className="btn btn-outline-light d-block mb-3">
-          Resource Dashboard
-        </Link>
-        <Link to="/report-error" className="btn btn-outline-light d-block mb-3">
-          Report an Issue
-        </Link>
       </div>
+
+      {/* Navigation Items */}
+      <nav className="sidebar-nav">
+        {navItems.map((item) => {
+          const IconComponent = item.icon;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`nav-item ${isActive(item.path) ? 'active' : ''}`}
+              title={!isExpanded ? item.label : ''}
+            >
+              <span className="nav-icon"><IconComponent /></span>
+              {isExpanded && <span className="nav-label">{item.label}</span>}
+            </Link>
+          );
+        })}
+      </nav>
 
       {/* Footer */}
       <div className="text-center mt-4">
