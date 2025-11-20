@@ -9,7 +9,9 @@ import {
   FaChartBar,
   FaBug,
   FaBars,
-  FaTimes
+  FaTimes,
+  FaUser,
+  FaSignOutAlt
 } from 'react-icons/fa';
 import { IconType } from 'react-icons';
 import '../styles/NavigateBar.css';
@@ -20,7 +22,12 @@ interface NavItem {
   icon: IconType;
 }
 
-const NavigateBar: React.FC = () => {
+interface NavigateBarProps {
+  nickname?: string;
+  onLogout?: () => void;
+}
+
+const NavigateBar: React.FC<NavigateBarProps> = ({ nickname, onLogout }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   const location = useLocation();
 
@@ -84,6 +91,33 @@ const NavigateBar: React.FC = () => {
           );
         })}
       </nav>
+
+      {/* User Section */}
+      {nickname && (
+        <div className="sidebar-user">
+          <div className={`user-info ${!isExpanded ? 'collapsed' : ''}`}>
+            <div className="user-avatar">
+              {React.createElement(FaUser as React.FC)}
+            </div>
+            {isExpanded && (
+              <div className="user-details">
+                <p className="user-nickname">{nickname}</p>
+              </div>
+            )}
+          </div>
+          {onLogout && (
+            <button
+              className="logout-button"
+              onClick={onLogout}
+              title={!isExpanded ? 'Logout' : ''}
+              aria-label="Logout"
+            >
+              <span className="logout-icon">{React.createElement(FaSignOutAlt as React.FC)}</span>
+              {isExpanded && <span className="logout-label">Logout</span>}
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Footer */}
       <div className="sidebar-footer">
