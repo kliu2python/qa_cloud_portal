@@ -51,14 +51,42 @@ const Header: React.FC<HeaderProps> = ({ nickname, resetNickname, handleNickname
 
   return (
     <Container fluid>
-      <Row className="bg-primary text-white py-3 mb-4">
+      <Row
+        className="text-white py-4 mb-4"
+        style={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+          borderRadius: '0 0 12px 12px'
+        }}
+      >
         <Col xs={8}>
-          <h1 className="mb-0">{title}</h1>
+          <h1
+            className="mb-0"
+            style={{
+              fontWeight: '700',
+              fontSize: '2rem',
+              letterSpacing: '-0.5px',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            {title}
+          </h1>
         </Col>
-        <Col xs={4} className="text-end">
+        <Col xs={4} className="text-end d-flex align-items-center justify-content-end">
           {showLogin && (nickname ? (
             <Dropdown>
-              <Dropdown.Toggle variant="success">{nickname}</Dropdown.Toggle>
+              <Dropdown.Toggle
+                variant="light"
+                style={{
+                  fontWeight: '600',
+                  padding: '0.5rem 1.5rem',
+                  borderRadius: '8px',
+                  border: 'none',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                }}
+              >
+                {nickname}
+              </Dropdown.Toggle>
               <Dropdown.Menu>
                 <Dropdown.Item onClick={resetNickname}>Logout</Dropdown.Item>
               </Dropdown.Menu>
