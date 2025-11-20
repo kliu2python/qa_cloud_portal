@@ -25,7 +25,7 @@ const ReportError: React.FC<ReportErrorProps> = ({
     }
 
     try {
-      const response = await fetch('http://10.160.83.213:8309/send-error-report', {
+      const response = await fetch('https://10.160.83.213:8309/send-error-report', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

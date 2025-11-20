@@ -72,7 +72,7 @@ const ResourcePage: React.FC<ResourcePageProps> = ({
   };
 
   const launchNFS = () => {
-    window.open('http://10.160.13.30:8888/lab/tree/apks', '_blank');
+    window.open('https://10.160.13.30:8888/lab/tree/apks', '_blank');
   };
 
   return (
