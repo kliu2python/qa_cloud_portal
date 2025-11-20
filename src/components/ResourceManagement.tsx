@@ -104,40 +104,77 @@ const ResourceManagement: React.FC<ResourceManageProps> = ({ nickName }) => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <div style={{ marginTop: '30px' }}>
-        <Table striped bordered hover responsive variant="light">
-          <thead>
-            <tr>
-              <th>Resource Name</th>
-              <th>Description</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {resources.map((resource, index) => (
-              <tr key={index}>
-                <td>{resource.name}</td>
-                <td>{resource.description}</td>
-                <td>
-                  <Button
-                    variant="primary"
-                    onClick={() => handleLinkClick(resource.link)}
-                  >
-                    Open
-                  </Button>
-                  <Button
-                    variant="info"
-                    style={{ marginLeft: '10px' }}
-                    onClick={() => handleOpenModal(resource)}
-                  >
-                    How to Use
-                  </Button>
-                </td>
+    <div style={{ background: '#f4f6f8', minHeight: '100vh' }}>
+      {/* Hero Section */}
+      <div style={{
+        background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+        padding: '60px 0',
+        marginBottom: '30px',
+        color: 'white',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '15px' }}>
+            Resource Dashboard
+          </h1>
+          <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>
+            Access comprehensive testing resources including device farms, servers, and analysis tools
+          </p>
+        </div>
+      </div>
+
+      <div style={{ padding: '0 20px 40px', maxWidth: '1400px', margin: '0 auto' }}>
+        <div style={{
+          background: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+          overflow: 'hidden'
+        }}>
+          <Table striped bordered hover responsive variant="light" style={{ marginBottom: 0 }}>
+            <thead style={{
+              background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+              color: 'white'
+            }}>
+              <tr>
+                <th style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)', fontWeight: '600' }}>Resource Name</th>
+                <th style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)', fontWeight: '600' }}>Description</th>
+                <th style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)', fontWeight: '600' }}>Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {resources.map((resource, index) => (
+                <tr key={index}>
+                  <td style={{ fontWeight: '500', color: '#0f172a' }}>{resource.name}</td>
+                  <td style={{ color: '#475569' }}>{resource.description}</td>
+                  <td>
+                    <div className="d-flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleLinkClick(resource.link)}
+                        style={{
+                          background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                          border: 'none'
+                        }}
+                      >
+                        Open
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleOpenModal(resource)}
+                        style={{
+                          background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                          border: 'none'
+                        }}
+                      >
+                        How to Use
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
       </div>
 
       {/* Modal for intro slideshow */}

@@ -88,26 +88,57 @@ const BrowserCloud: React.FC<BrowserCloudProps> = ({ nickName }) => {
   }, [autoRefresh]);
 
   return (
-    <Container fluid style={{ padding: '24px', background: '#f4f6f8', minHeight: '100vh' }}>
-      {/* Header Section */}
-      <Card style={{ marginBottom: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-        <Card.Body>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ margin: 0 }}>Selenium Grid Manager</h2>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <Button variant="success" onClick={fetchGridStatus} disabled={loading}>
-                🔄 {loading ? 'Refreshing...' : 'Refresh'}
-              </Button>
-              <Button
-                variant={autoRefresh ? 'warning' : 'primary'}
-                onClick={() => setAutoRefresh(!autoRefresh)}
-              >
-                {autoRefresh ? '⏸ Stop Auto' : '▶ Start Auto'}
-              </Button>
+    <div style={{ background: '#f4f6f8', minHeight: '100vh' }}>
+      {/* Hero Section */}
+      <div style={{
+        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        padding: '60px 0',
+        marginBottom: '30px',
+        color: 'white',
+        textAlign: 'center'
+      }}>
+        <Container>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '15px' }}>
+            Browser Cloud
+          </h1>
+          <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>
+            Selenium Grid Manager - Real-time browser testing infrastructure
+          </p>
+        </Container>
+      </div>
+
+      <Container fluid style={{ padding: '24px' }}>
+        {/* Control Panel */}
+        <Card style={{ marginBottom: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', border: 'none' }}>
+          <Card.Body>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, color: '#0f172a' }}>Control Panel</h3>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <Button
+                  style={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    border: 'none'
+                  }}
+                  onClick={fetchGridStatus}
+                  disabled={loading}
+                >
+                  🔄 {loading ? 'Refreshing...' : 'Refresh'}
+                </Button>
+                <Button
+                  style={{
+                    background: autoRefresh
+                      ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+                      : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    border: 'none'
+                  }}
+                  onClick={() => setAutoRefresh(!autoRefresh)}
+                >
+                  {autoRefresh ? '⏸ Stop Auto' : '▶ Start Auto'}
+                </Button>
+              </div>
             </div>
-          </div>
-        </Card.Body>
-      </Card>
+          </Card.Body>
+        </Card>
 
       {/* Error Alert */}
       {error && (
@@ -118,42 +149,58 @@ const BrowserCloud: React.FC<BrowserCloudProps> = ({ nickName }) => {
 
       {/* Statistics Cards */}
       {gridData && (
-        <Row style={{ marginBottom: '20px' }}>
-          <Col md={3}>
-            <Card className="text-center" style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+        <Row style={{ marginBottom: '30px' }}>
+          <Col md={3} className="mb-3">
+            <Card className="text-center" style={{
+              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+              border: 'none',
+              borderTop: '4px solid #667eea'
+            }}>
               <Card.Body>
-                <div style={{ fontSize: '14px', color: '#666' }}>Active Sessions</div>
-                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#0f172a' }}>
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '10px' }}>Active Sessions</div>
+                <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#667eea' }}>
                   {gridData.statistics.activeSessions}
                 </div>
               </Card.Body>
             </Card>
           </Col>
-          <Col md={3}>
-            <Card className="text-center" style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+          <Col md={3} className="mb-3">
+            <Card className="text-center" style={{
+              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+              border: 'none',
+              borderTop: '4px solid #43e97b'
+            }}>
               <Card.Body>
-                <div style={{ fontSize: '14px', color: '#666' }}>Available Slots</div>
-                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#0f172a' }}>
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '10px' }}>Available Slots</div>
+                <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#43e97b' }}>
                   {gridData.statistics.availableSlots}
                 </div>
               </Card.Body>
             </Card>
           </Col>
-          <Col md={3}>
-            <Card className="text-center" style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+          <Col md={3} className="mb-3">
+            <Card className="text-center" style={{
+              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+              border: 'none',
+              borderTop: '4px solid #4facfe'
+            }}>
               <Card.Body>
-                <div style={{ fontSize: '14px', color: '#666' }}>Total Nodes</div>
-                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#0f172a' }}>
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '10px' }}>Total Nodes</div>
+                <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#4facfe' }}>
                   {gridData.statistics.totalNodes}
                 </div>
               </Card.Body>
             </Card>
           </Col>
-          <Col md={3}>
-            <Card className="text-center" style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+          <Col md={3} className="mb-3">
+            <Card className="text-center" style={{
+              boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+              border: 'none',
+              borderTop: '4px solid #fa709a'
+            }}>
               <Card.Body>
-                <div style={{ fontSize: '14px', color: '#666' }}>Total Slots</div>
-                <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#0f172a' }}>
+                <div style={{ fontSize: '14px', color: '#666', marginBottom: '10px' }}>Total Slots</div>
+                <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#fa709a' }}>
                   {gridData.statistics.totalSlots}
                 </div>
               </Card.Body>
@@ -163,9 +210,9 @@ const BrowserCloud: React.FC<BrowserCloudProps> = ({ nickName }) => {
       )}
 
       {/* Active Sessions Section */}
-      <Card style={{ marginBottom: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+      <Card style={{ marginBottom: '30px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', border: 'none' }}>
         <Card.Body>
-          <h3>Active Sessions</h3>
+          <h3 style={{ color: '#0f172a', marginBottom: '20px' }}>Active Sessions</h3>
           {gridData && gridData.sessions.length === 0 ? (
             <div style={{ color: '#666', padding: '20px', textAlign: 'center' }}>
               No active sessions
@@ -173,30 +220,47 @@ const BrowserCloud: React.FC<BrowserCloudProps> = ({ nickName }) => {
           ) : (
             <Row>
               {gridData?.sessions.map((session: ActiveSession) => (
-                <Col md={4} key={session.sessionId} style={{ marginBottom: '15px' }}>
-                  <Card style={{ border: '1px solid #e2e8f0', height: '100%' }}>
+                <Col md={4} key={session.sessionId} style={{ marginBottom: '20px' }}>
+                  <Card style={{
+                    border: 'none',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    height: '100%',
+                    transition: 'transform 0.2s',
+                    borderLeft: '4px solid #f093fb'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                  >
                     <Card.Body>
-                      <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
+                      <div style={{ fontWeight: 'bold', marginBottom: '10px', color: '#0f172a', fontSize: '16px' }}>
                         {session.capabilities.browserName || 'Unknown'}{' '}
                         {session.capabilities.browserVersion || ''}
                       </div>
                       <div style={{ fontSize: '12px', color: '#666', wordBreak: 'break-all', marginBottom: '10px' }}>
-                        ID: {session.sessionId}
+                        <strong>ID:</strong> {session.sessionId}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '10px' }}>
-                        Platform: {session.capabilities.platformName || 'N/A'}
+                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '15px' }}>
+                        <strong>Platform:</strong> {session.capabilities.platformName || 'N/A'}
                       </div>
                       <div style={{ display: 'flex', gap: '10px' }}>
                         <Button
-                          variant="primary"
                           size="sm"
+                          style={{
+                            background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                            border: 'none',
+                            flex: 1
+                          }}
                           onClick={() => openVNCViewer(session.sessionId, gridData?.vncPassword || 'secret')}
                         >
                           🖥️ View
                         </Button>
                         <Button
-                          variant="danger"
                           size="sm"
+                          style={{
+                            background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)',
+                            border: 'none',
+                            flex: 1
+                          }}
                           onClick={() => deleteSession(session.sessionId)}
                         >
                           ✖ Kill
@@ -212,29 +276,40 @@ const BrowserCloud: React.FC<BrowserCloudProps> = ({ nickName }) => {
       </Card>
 
       {/* Nodes Section */}
-      <Card style={{ boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+      <Card style={{ boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', border: 'none' }}>
         <Card.Body>
-          <h3>Nodes</h3>
+          <h3 style={{ color: '#0f172a', marginBottom: '20px' }}>Grid Nodes</h3>
           <Row>
             {gridData?.nodes.map((node: GridNode) => {
               const hasAvailableSlots = node.slots.some(s => !s.session);
               return (
-                <Col md={4} key={node.id} style={{ marginBottom: '15px' }}>
+                <Col md={4} key={node.id} style={{ marginBottom: '20px' }}>
                   <Card
                     style={{
-                      borderLeft: `4px solid ${hasAvailableSlots ? '#16a34a' : '#f59e0b'}`,
-                      height: '100%'
+                      border: 'none',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      borderLeft: `4px solid ${hasAvailableSlots ? '#43e97b' : '#fa709a'}`,
+                      height: '100%',
+                      transition: 'transform 0.2s'
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                   >
                     <Card.Body>
-                      <div style={{ fontSize: '14px', marginBottom: '5px' }}>
+                      <div style={{ fontSize: '14px', marginBottom: '10px', color: '#0f172a' }}>
                         <strong>URI:</strong> {node.uri}
                       </div>
-                      <div style={{ fontSize: '12px', color: '#666', marginBottom: '5px' }}>
-                        Availability: {node.availability}
+                      <div style={{ fontSize: '13px', color: '#666', marginBottom: '8px' }}>
+                        <strong>Availability:</strong> <span style={{
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          background: node.availability === 'UP' ? '#e6f7ed' : '#fee',
+                          color: node.availability === 'UP' ? '#16a34a' : '#dc2626'
+                        }}>{node.availability}</span>
                       </div>
-                      <div style={{ fontSize: '12px', color: '#666' }}>
-                        Slots: {node.slots.length} ({node.slots.filter(s => !s.session).length} available)
+                      <div style={{ fontSize: '13px', color: '#666' }}>
+                        <strong>Slots:</strong> {node.slots.length} total
+                        ({node.slots.filter(s => !s.session).length} available)
                       </div>
                     </Card.Body>
                   </Card>
@@ -243,12 +318,13 @@ const BrowserCloud: React.FC<BrowserCloudProps> = ({ nickName }) => {
             })}
           </Row>
           {gridData && gridData.nodes.length === 0 && (
-            <div style={{ color: '#666', padding: '20px', textAlign: 'center' }}>
+            <div style={{ color: '#666', padding: '40px', textAlign: 'center', fontSize: '16px' }}>
               No nodes available
             </div>
           )}
         </Card.Body>
       </Card>
+      </Container>
 
       {/* VNC Modal */}
       {selectedSession && (
@@ -260,7 +336,7 @@ const BrowserCloud: React.FC<BrowserCloudProps> = ({ nickName }) => {
           gridUrl={config.seleniumGridUrl}
         />
       )}
-    </Container>
+    </div>
   );
 };
 

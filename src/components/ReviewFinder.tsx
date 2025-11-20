@@ -447,32 +447,53 @@ const ReviewFinder: React.FC = () => {
   };
 
   return (
-    <Container>
-      <Row className="mb-10">
-        <Col xs={2}>
-          <Form.Group controlId="platform">
-            <Form.Label>Platform</Form.Label>
-            <Form.Control
-              as="select"
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value)}
-            >
-              <option value="">Select Platform</option>
-              <option value="google_play">Google Play</option>
-              <option value="apple_store">App Store</option>
-              <option value="reddit">Reddit</option>
-            </Form.Control>
-          </Form.Group>
-        </Col>
+    <div style={{ background: '#f4f6f8', minHeight: '100vh' }}>
+      {/* Hero Section */}
+      <div style={{
+        background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        padding: '60px 0',
+        marginBottom: '30px',
+        color: 'white',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
+          <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '15px' }}>
+            FortiReviewFinder
+          </h1>
+          <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>
+            Aggregate and analyze app reviews from Google Play, App Store, and Reddit
+          </p>
+        </div>
+      </div>
+
+      <Container style={{ paddingBottom: '40px' }}>
+        <Row className="mb-4">
+          <Col xs={12} md={2}>
+            <Form.Group controlId="platform">
+              <Form.Label style={{ fontWeight: '600', color: '#0f172a' }}>Platform</Form.Label>
+              <Form.Control
+                as="select"
+                value={platform}
+                onChange={(e) => setPlatform(e.target.value)}
+                style={{ borderColor: '#e2e8f0' }}
+              >
+                <option value="">Select Platform</option>
+                <option value="google_play">Google Play</option>
+                <option value="apple_store">App Store</option>
+                <option value="reddit">Reddit</option>
+              </Form.Control>
+            </Form.Group>
+          </Col>
 
         {platform === 'google_play' && (
-          <Col xs={2}>
+          <Col xs={12} md={2}>
             <Form.Group controlId="appName">
-              <Form.Label>App Name</Form.Label>
+              <Form.Label style={{ fontWeight: '600', color: '#0f172a' }}>App Name</Form.Label>
               <Form.Control
                 type="text"
                 value={appName}
                 onChange={(e) => setAppName(e.target.value)}
+                style={{ borderColor: '#e2e8f0' }}
               />
             </Form.Group>
           </Col>
@@ -480,23 +501,25 @@ const ReviewFinder: React.FC = () => {
 
         {platform === 'apple_store' && (
           <>
-            <Col xs={2}>
+            <Col xs={12} md={2}>
               <Form.Group controlId="appName">
-                <Form.Label>App Name</Form.Label>
+                <Form.Label style={{ fontWeight: '600', color: '#0f172a' }}>App Name</Form.Label>
                 <Form.Control
                   type="text"
                   value={appName}
                   onChange={(e) => setAppName(e.target.value)}
+                  style={{ borderColor: '#e2e8f0' }}
                 />
               </Form.Group>
             </Col>
-            <Col xs={2}>
+            <Col xs={12} md={2}>
               <Form.Group controlId="appId">
-                <Form.Label>App ID</Form.Label>
+                <Form.Label style={{ fontWeight: '600', color: '#0f172a' }}>App ID</Form.Label>
                 <Form.Control
                   type="text"
                   value={appId}
                   onChange={(e) => setAppId(e.target.value)}
+                  style={{ borderColor: '#e2e8f0' }}
                 />
               </Form.Group>
             </Col>
@@ -504,15 +527,16 @@ const ReviewFinder: React.FC = () => {
         )}
 
         {platform && (
-          <Col xs={2}>
+          <Col xs={12} md={2}>
             <Form.Group controlId="filterRating">
-              <Form.Label>Filter by Rating</Form.Label>
+              <Form.Label style={{ fontWeight: '600', color: '#0f172a' }}>Filter by Rating</Form.Label>
               <Form.Control
                 as="select"
                 value={filterRating ?? ''}
                 onChange={(e) =>
                   setFilterRating(e.target.value ? parseInt(e.target.value, 10) : null)
                 }
+                style={{ borderColor: '#e2e8f0' }}
               >
                 <option value="">All Ratings</option>
                 <option value="1">1 Star</option>
@@ -528,42 +552,84 @@ const ReviewFinder: React.FC = () => {
 
       <Row className="mb-4">
         <Col className="text-center">
-          <Button variant="primary" onClick={fetchAndDisplayReviews} className="me-3">
-            Fetch Reviews
-          </Button>
-          <Button variant="secondary" onClick={() => window.location.reload()} className="me-3">
-            Refresh
-          </Button>
-          {reviews.length > 0 && (
-            <Button variant="success" onClick={downloadExcel} className="me-3">
-              Download
+          <div className="d-flex flex-wrap gap-2 justify-content-center">
+            <Button
+              onClick={fetchAndDisplayReviews}
+              style={{
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                border: 'none'
+              }}
+            >
+              Fetch Reviews
             </Button>
-          )}
-          <Button variant="info" onClick={() => setShowSubscriptionModal(true)} className="me-3">
-            Subscribe to Topics
-          </Button>
-          <Button variant="outline-danger" onClick={() => setShowUnsubscribeModal(true)}>
-            Unsubscribe
-          </Button>
+            <Button
+              onClick={() => window.location.reload()}
+              style={{
+                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                border: 'none'
+              }}
+            >
+              Refresh
+            </Button>
+            {reviews.length > 0 && (
+              <Button
+                onClick={downloadExcel}
+                style={{
+                  background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                  border: 'none'
+                }}
+              >
+                Download
+              </Button>
+            )}
+            <Button
+              onClick={() => setShowSubscriptionModal(true)}
+              style={{
+                background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                border: 'none'
+              }}
+            >
+              Subscribe to Topics
+            </Button>
+            <Button
+              onClick={() => setShowUnsubscribeModal(true)}
+              style={{
+                background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)',
+                border: 'none'
+              }}
+            >
+              Unsubscribe
+            </Button>
+          </div>
         </Col>
       </Row>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
       {reviews.length > 0 && (
-        <div>
-          <h2>Reviews</h2>
-          <Table striped bordered hover responsive>
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Rating</th>
-              <th>Content</th>
-              <th>Review Version</th>
-              <th>Thumbs Up Count</th>
-              <th>Date</th>
-            </tr>
-          </thead>
+        <div style={{
+          background: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+          padding: '20px',
+          marginBottom: '20px'
+        }}>
+          <h2 style={{ color: '#0f172a', marginBottom: '20px' }}>Reviews</h2>
+          <div style={{ overflow: 'hidden', borderRadius: '8px' }}>
+            <Table striped bordered hover responsive style={{ marginBottom: 0 }}>
+              <thead style={{
+                background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                color: 'white'
+              }}>
+                <tr>
+                  <th style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)' }}>Username</th>
+                  <th style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)' }}>Rating</th>
+                  <th style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)' }}>Content</th>
+                  <th style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)' }}>Review Version</th>
+                  <th style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)' }}>Thumbs Up Count</th>
+                  <th style={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)' }}>Date</th>
+                </tr>
+              </thead>
           <tbody>
             {getPagedReviews().map((review, index) => (
               <tr key={index}>
@@ -590,9 +656,10 @@ const ReviewFinder: React.FC = () => {
                 <td>{review.date}</td>
               </tr>
             ))}
-          </tbody>
-        </Table>
-          <div className="d-flex justify-content-center mt-3">
+              </tbody>
+            </Table>
+          </div>
+          <div className="d-flex justify-content-center mt-4">
             <Button
               onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
               disabled={currentPage === 1}
@@ -799,6 +866,7 @@ const ReviewFinder: React.FC = () => {
         </Modal.Footer>
       </Modal>
     </Container>
+    </div>
   );
 };
 
