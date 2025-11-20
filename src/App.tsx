@@ -12,8 +12,8 @@ import HomePage from './components/HomePage'; // Import the new HomePage compone
 import NavigateBar from './components/NavigateBar';
 import ReportError from './components/ReportError';
 import ResourceManagement from './components/ResourceManagement';
-import Header from './components/Header';
 import BrowserCloud from './components/BrowserCloud';
+import ProtectedRoute from './components/ProtectedRoute';
 import config from './config/config';
 import ReviewFinder from './components/ReviewFinder';
 import JenkinsCloudPage from './components/JenkinsCloud';
@@ -144,9 +144,6 @@ const App: React.FC = () => {
         <NavigateBar />
         {/* Main Content */}
         <div className="flex-grow-1">
-        <Header nickname={nickname} resetNickname={resetNickname} handleNicknameSubmit={handleNicknameSubmit} />
-          
-
           <Container fluid>
           <Routes>
             {/* Home Page */}
@@ -159,24 +156,28 @@ const App: React.FC = () => {
             <Route
               path="/emulator-cloud"
               element={
-                <ResourcePage
-                  resources={resources}
-                  createResource={createEmulator}
-                  deleteResource={deleteResource}
-                  launchVNC={launchVNC}
-                  refreshPage={() => fetchResources(nickname)}
-                  nickName={nickname}
-                  resetNickname={resetNickname}
-                  handleCreateNew={() => setModalIsOpen(true)}
-                  updateResourceStatus={updateResourceStatus}
-                  handleNicknameSubmit={handleNicknameSubmit}
-                />
+                <ProtectedRoute nickname={nickname} handleNicknameSubmit={handleNicknameSubmit}>
+                  <ResourcePage
+                    resources={resources}
+                    createResource={createEmulator}
+                    deleteResource={deleteResource}
+                    launchVNC={launchVNC}
+                    refreshPage={() => fetchResources(nickname)}
+                    nickName={nickname}
+                    resetNickname={resetNickname}
+                    handleCreateNew={() => setModalIsOpen(true)}
+                    updateResourceStatus={updateResourceStatus}
+                    handleNicknameSubmit={handleNicknameSubmit}
+                  />
+                </ProtectedRoute>
               }
             />
             <Route path="/browser-cloud" element={
-              <BrowserCloud 
-                nickName={nickname}
-              />}
+              <ProtectedRoute nickname={nickname} handleNicknameSubmit={handleNicknameSubmit}>
+                <BrowserCloud
+                  nickName={nickname}
+                />
+              </ProtectedRoute>}
             />
             <Route path="/jenkins-cloud" element={
               <JenkinsCloudPage 
@@ -191,10 +192,12 @@ const App: React.FC = () => {
               />} 
             />
             <Route path="/report-error" element={
-              <ReportError
-                nickName={nickname}
-              />
-              } 
+              <ProtectedRoute nickname={nickname} handleNicknameSubmit={handleNicknameSubmit}>
+                <ReportError
+                  nickName={nickname}
+                />
+              </ProtectedRoute>
+              }
             />
             <Route path="/jenkins-cloud/:jobName" element={<JobDetailPage />} />
           </Routes>

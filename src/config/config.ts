@@ -3,6 +3,8 @@ const config = {
     reviewfinderUrl: 'http://10.160.24.88:30423',
     jenkinsCloudUrl: 'http://localhost:8080',
     emailServiceUrl: 'http://10.160.24.88:30309' // Email service for error reporting
+    seleniumGridBackendUrl: 'http://10.160.24.88:31590', // Selenium Grid Backend
+    seleniumGridUrl: 'http://10.160.24.88:31590' // Selenium Grid URL
   };
 
   export default config;
