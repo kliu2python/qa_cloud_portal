@@ -1226,6 +1226,7 @@ const ReviewFinder: React.FC = () => {
         </Modal.Footer>
       </Modal>
     </Container>
+    </div>
   );
 };
 
