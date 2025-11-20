@@ -121,7 +121,7 @@ const App: React.FC = () => {
   };
 
   const launchVNC = (port: number) => {
-    window.open(`http://10.160.24.88:${port}/?password=fortinet`, '_blank');
+    window.open(`https://10.160.24.88:${port}/?password=fortinet`, '_blank');
   };
 
   const handleOSSubmit = (selectedOS: string) => {

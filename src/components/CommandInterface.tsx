@@ -14,7 +14,7 @@ const CommandInterface: React.FC<CommandInterfaceProps> = ({ onGoBack }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/execute', {
+      const response = await fetch('https://localhost:3000/execute', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
