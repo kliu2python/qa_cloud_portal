@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, Container, Row, Table, Col, Form, Modal, Card, Badge, Spinner, Alert, InputGroup } from 'react-bootstrap';
+import { Button, Container, Row, Table, Col, Form, Modal, Card, Badge, Spinner, Alert, InputGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { saveAs } from 'file-saver';
 import * as XLSX from 'xlsx';
 import {
@@ -19,7 +19,8 @@ import {
   FaSortDown,
   FaTimes,
   FaCheckCircle,
-  FaExclamationCircle
+  FaExclamationCircle,
+  FaQuestionCircle
 } from 'react-icons/fa';
 import '../styles/ReviewFinder.css';
 import config from '../config/config';
@@ -605,10 +606,51 @@ const ReviewFinder: React.FC = () => {
       {/* Search Form Section */}
       <Card className="search-form-card mb-4">
         <Card.Body>
-          <h5 className="section-title">
-            <FaFilter className="me-2" />
-            Review Search Configuration
-          </h5>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+            <h5 className="section-title" style={{ marginBottom: 0 }}>
+              <FaFilter className="me-2" />
+              Review Search Configuration
+            </h5>
+            <OverlayTrigger
+              placement="right"
+              overlay={
+                <Tooltip id="review-finder-help">
+                  <div style={{ textAlign: 'left' }}>
+                    <strong>Review Finder Service</strong>
+                    <hr style={{ margin: '8px 0', borderColor: 'rgba(255,255,255,0.3)' }} />
+                    <p style={{ margin: '4px 0' }}><strong>What it does:</strong></p>
+                    <p style={{ margin: '4px 0', fontSize: '13px' }}>
+                      Advanced review analytics platform for monitoring and analyzing product reviews across multiple app stores and platforms
+                    </p>
+                    <p style={{ margin: '8px 0 4px 0' }}><strong>How to use:</strong></p>
+                    <ul style={{ margin: '4px 0', paddingLeft: '20px', fontSize: '13px' }}>
+                      <li>Select platform (Google Play, Apple Store, or Reddit)</li>
+                      <li>Enter app name and ID (for Apple Store)</li>
+                      <li>Apply filters by rating, sentiment, or keywords</li>
+                      <li>Click "Search" to fetch and analyze reviews</li>
+                      <li>View statistics, sentiment analysis, and charts</li>
+                      <li>Export results to Excel for reporting</li>
+                      <li>Subscribe to email notifications for new reviews</li>
+                    </ul>
+                    <p style={{ margin: '8px 0 4px 0' }}><strong>What you get:</strong></p>
+                    <ul style={{ margin: '4px 0', paddingLeft: '20px', fontSize: '13px' }}>
+                      <li>Multi-platform review aggregation</li>
+                      <li>AI-powered sentiment analysis (positive/neutral/negative)</li>
+                      <li>Advanced filtering and keyword search</li>
+                      <li>Visual analytics with charts and statistics</li>
+                      <li>Excel export for reporting and analysis</li>
+                      <li>Email subscription for monitoring new reviews</li>
+                      <li>Sortable tables with expandable review details</li>
+                    </ul>
+                  </div>
+                </Tooltip>
+              }
+            >
+              <span style={{ cursor: 'help', color: '#4facfe', display: 'flex', alignItems: 'center' }}>
+                <FaQuestionCircle size={18} />
+              </span>
+            </OverlayTrigger>
+          </div>
           <Row className="g-3">
             <Col md={3}>
               <Form.Group controlId="platform">

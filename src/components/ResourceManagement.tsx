@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Table, Button, Modal } from 'react-bootstrap';
+import { Table, Button, Modal, Card, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { FaQuestionCircle } from 'react-icons/fa';
 import Slider from 'react-slick';
 
 interface ResourceManageProps {
@@ -105,7 +106,50 @@ const ResourceManagement: React.FC<ResourceManageProps> = ({ nickName }) => {
 
   return (
     <div style={{ background: '#f4f6f8', minHeight: '100vh' }}>
-      <div style={{ padding: '0 20px 40px', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ padding: '24px 20px 40px', maxWidth: '1400px', margin: '0 auto' }}>
+        <Card style={{ marginBottom: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', border: 'none' }}>
+          <Card.Body>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <h3 style={{ margin: 0, color: '#0f172a' }}>Resource Management</h3>
+              <OverlayTrigger
+                placement="right"
+                overlay={
+                  <Tooltip id="resource-management-help">
+                    <div style={{ textAlign: 'left' }}>
+                      <strong>Resource Management Service</strong>
+                      <hr style={{ margin: '8px 0', borderColor: 'rgba(255,255,255,0.3)' }} />
+                      <p style={{ margin: '4px 0' }}><strong>What it does:</strong></p>
+                      <p style={{ margin: '4px 0', fontSize: '13px' }}>
+                        Centralized hub for accessing essential testing infrastructure and development tools
+                      </p>
+                      <p style={{ margin: '8px 0 4px 0' }}><strong>How to use:</strong></p>
+                      <ul style={{ margin: '4px 0', paddingLeft: '20px', fontSize: '13px' }}>
+                        <li>Click "Open" to access a resource in a new browser tab</li>
+                        <li>Click "How to Use" to view step-by-step tutorial screenshots</li>
+                        <li>Browse the table to discover available testing tools</li>
+                        <li>Use the carousel in tutorials to navigate through setup steps</li>
+                        <li>Click images to zoom for detailed viewing</li>
+                      </ul>
+                      <p style={{ margin: '8px 0 4px 0' }}><strong>What you get:</strong></p>
+                      <ul style={{ margin: '4px 0', paddingLeft: '20px', fontSize: '13px' }}>
+                        <li>Direct access to Jupyter Server for file management</li>
+                        <li>Jenkins CI/CD pipeline management</li>
+                        <li>Android and iOS device farm connectivity</li>
+                        <li>Failure test case screenshot search tool</li>
+                        <li>Ollama AI code assistance setup</li>
+                        <li>Interactive tutorials with visual guides</li>
+                      </ul>
+                    </div>
+                  </Tooltip>
+                }
+              >
+                <span style={{ cursor: 'help', color: '#4facfe', display: 'flex', alignItems: 'center' }}>
+                  <FaQuestionCircle size={18} />
+                </span>
+              </OverlayTrigger>
+            </div>
+          </Card.Body>
+        </Card>
         <div style={{
           background: 'white',
           borderRadius: '8px',
