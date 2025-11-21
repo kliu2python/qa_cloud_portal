@@ -1,34 +1,31 @@
-# QA Cloud Portal - Email Service Deployment Guide
+# QA Cloud Portal - Deployment Guide
 
-Complete guide for deploying the QA Cloud Portal with Email Service functionality.
+Complete guide for deploying the QA Cloud Portal frontend.
 
 ## Architecture Overview
 
-The QA Cloud Portal now includes an email service that sends error reports via Gmail SMTP:
+The QA Cloud Portal is a React SPA that connects to separate backend services:
 
 ```
-┌─────────────────┐         ┌──────────────────┐         ┌─────────────┐
-│   React SPA     │  HTTP   │  Email Service   │  SMTP   │   Gmail     │
-│  (Frontend)     │────────▶│   (Backend)      │────────▶│   Server    │
-│  Port 3000      │         │   Port 8309      │         │  Port 587   │
-└─────────────────┘         └──────────────────┘         └─────────────┘
+┌─────────────────┐         ┌──────────────────┐
+│   React SPA     │  HTTP   │  Backend APIs    │
+│  (Frontend)     │────────▶│  (Separate)      │
+│  Port 3000      │         │  Various ports   │
+└─────────────────┘         └──────────────────┘
 ```
 
-**Frontend**: React SPA with error reporting form
-**Backend**: Node.js/Express email service with Nodemailer
-**Email**: Gmail SMTP for sending formatted error reports
+**Frontend**: React SPA with TypeScript
+**Backend**: Separate backend services (deployed independently)
 
 ## Prerequisites
 
 - Docker installed
-- Kubernetes cluster access
-- kubectl configured
+- Kubernetes cluster access (if deploying to K8s)
+- kubectl configured (if deploying to K8s)
 - Access to Docker registry: `10.160.16.60/uiux`
-- Gmail account with App Password (already configured)
+- Backend services running and accessible
 
-## 1. Build and Push Docker Images
-
-### Frontend (React App)
+## 1. Build and Push Docker Image
 
 ```bash
 # From project root
@@ -38,390 +35,160 @@ make push_docker_image
 
 This builds and pushes: `10.160.16.60/uiux/portal:latest`
 
-### Backend (Email Service)
-
+Or manually:
 ```bash
-# Navigate to backend directory
-cd backend
-
-# Build and push using Makefile
-make build
-make push
-
-# Or build manually
-docker build -t 10.160.16.60/uiux/email-service:latest .
-docker push 10.160.16.60/uiux/email-service:latest
+docker build -t 10.160.16.60/uiux/portal:latest .
+docker push 10.160.16.60/uiux/portal:latest
 ```
 
-## 2. Deploy to Kubernetes
+## 2. Configuration
 
-### Deploy Email Service First
+Before deploying, configure backend API endpoints in `src/config/config.ts`:
 
-```bash
-# Apply ConfigMap with SMTP credentials
-kubectl apply -f k8s/email-service-configmap.yaml
-
-# Deploy email service
-kubectl apply -f k8s/email-service-deployment.yaml
-
-# (Optional) Expose via NodePort for external access
-kubectl apply -f k8s/email-service-nodeport.yaml
+```typescript
+const config = {
+  emulatorBaseUrl: 'http://10.160.24.88:32677',
+  reviewfinderUrl: 'http://10.160.24.88:30423',
+  jenkinsCloudUrl: 'http://localhost:8080',
+  emailServiceUrl: 'http://10.160.24.88:30309',
+  seleniumGridBackendUrl: 'http://10.160.24.88:31590',
+  seleniumGridUrl: 'http://10.160.24.88:31590'
+};
 ```
 
-### Verify Email Service
+## 3. Deploy to Kubernetes (Optional)
 
-```bash
-# Check pods are running
-kubectl get pods -l app=email-service
-
-# Check service
-kubectl get svc email-service
-
-# View logs
-kubectl logs -l app=email-service -f
-
-# Test health endpoint
-kubectl port-forward svc/email-service 8309:8309
-curl http://localhost:8309/health
-```
-
-### Deploy Frontend (if needed)
-
-If you have frontend k8s manifests, deploy them:
+If you have Kubernetes manifests:
 
 ```bash
 kubectl apply -f k8s/frontend-deployment.yaml
 ```
 
-## 3. Testing
+Verify deployment:
+```bash
+kubectl get pods -l app=qa-cloud-portal
+kubectl logs -l app=qa-cloud-portal -f
+```
 
-### Test Email Service Directly
+## 4. Run with Docker
 
 ```bash
-# Port forward to email service
-kubectl port-forward svc/email-service 8309:8309
-
-# Send test email
-curl -X POST http://localhost:8309/send-test-email \
-  -H "Content-Type: application/json" \
-  -d '{"recipient":"your-email@example.com"}'
-
-# Send error report
-curl -X POST http://localhost:8309/send-error-report \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Test Error from K8s",
-    "content": "Testing email service deployment",
-    "category": "Infrastructure"
-  }'
+docker run -p 3000:3000 10.160.16.60/uiux/portal:latest
 ```
 
-Expected response:
-```json
-{
-  "success": true,
-  "message": "Error report sent successfully",
-  "messageId": "<message-id@smtp.gmail.com>"
-}
-```
+Access the portal at: http://localhost:3000
 
-### Test from Frontend
-
-1. Access the QA Cloud Portal frontend
-2. Navigate to **Report Error** page (`/report-error`)
-3. Fill out the form:
-   - **Title**: "Test Error Report"
-   - **Category**: Any category
-   - **Description**: "Testing email integration"
-4. Click **Submit Report**
-5. Check for success message
-6. Verify email received at `ljiahao@fortinet.com`
-
-## 4. Configuration
-
-### Email Service Configuration
-
-The email service is configured via ConfigMap in `k8s/email-service-configmap.yaml`:
-
-```yaml
-SMTP_HOST: smtp.gmail.com
-SMTP_PORT: 587
-SMTP_USER: ftc.automation.time.smoke4@gmail.com
-SMTP_PASS: iyfbuhpeepzydyxg
-DEFAULT_RECIPIENT: ljiahao@fortinet.com
-```
-
-### Frontend Configuration
-
-The frontend is configured in `src/config/config.ts`:
-
-```typescript
-emailServiceUrl: 'http://10.160.24.88:30309'
-```
-
-This URL points to the NodePort service for the email backend.
-
-## 5. Monitoring
-
-### View Email Service Logs
+## 5. Development
 
 ```bash
-# Stream logs from all email service pods
-kubectl logs -l app=email-service --all-containers -f
+# Install dependencies
+npm install
 
-# View logs from specific pod
-kubectl logs <pod-name> -f
+# Start development server
+npm start
 
-# Search for errors
-kubectl logs -l app=email-service | grep -i error
+# Build for production
+npm run build
+
+# Run tests
+npm test
 ```
 
-### Health Checks
+## 6. Available Pages
 
-The email service includes two health endpoints:
+- `/` - Home page
+- `/emulator-cloud` - Emulator management
+- `/browser-cloud` - Browser cloud management
+- `/jenkins-cloud` - Jenkins dashboard
+- `/reviewfinder` - App review analysis
+- `/resource` - Resource monitoring
+- `/report-error` - Error reporting form
 
-**Liveness Probe**: `/health`
-- Checks if service is running
-- Returns basic status
+## 7. Troubleshooting
 
-**Readiness Probe**: `/ready`
-- Checks if service is ready to accept requests
-- Verifies SMTP connection
+### Frontend Issues
 
+**Clear cache and rebuild**:
 ```bash
-# Check health
-curl http://10.160.24.88:30309/health
-
-# Check readiness (includes SMTP test)
-curl http://10.160.24.88:30309/ready
+rm -rf node_modules build
+npm install
+npm run build
 ```
 
-## 6. Troubleshooting
+**Check API connectivity**:
+- Verify endpoints in `src/config/config.ts`
+- Ensure backend services are running and accessible
+- Test backend endpoints manually with curl
 
-### Email Service Not Sending Emails
+**Check logs** (if deployed to K8s):
+```bash
+kubectl logs -l app=qa-cloud-portal -f
+```
 
-1. **Check SMTP connection**:
+### Backend Connectivity Issues
+
+1. **Verify backend URLs** in `src/config/config.ts`
+2. **Test backend endpoints**:
    ```bash
-   kubectl logs -l app=email-service | grep -i smtp
-   ```
-
-2. **Verify credentials**:
-   ```bash
-   kubectl get configmap email-service-config -o yaml
-   ```
-
-3. **Test SMTP from pod**:
-   ```bash
-   kubectl exec -it <email-service-pod> -- sh
-   nc -zv smtp.gmail.com 587
-   ```
-
-4. **Check Gmail App Password**:
-   - Ensure 2FA is enabled on Gmail account
-   - App Password is valid and not revoked
-
-### Frontend Cannot Reach Email Service
-
-1. **Check service endpoint**:
-   ```bash
-   kubectl get endpoints email-service
-   ```
-
-2. **Verify NodePort service**:
-   ```bash
-   kubectl get svc email-service-nodeport
-   ```
-
-3. **Test connectivity**:
-   ```bash
+   curl http://10.160.24.88:32677/health
    curl http://10.160.24.88:30309/health
    ```
+3. **Check CORS settings** on backend services
+4. **Verify network connectivity** from frontend to backend
 
-4. **Check frontend config**:
-   - Verify `emailServiceUrl` in `src/config/config.ts`
-   - Ensure it points to correct NodePort URL
+## 8. Updating
 
-### Pods Not Starting
-
-```bash
-# Describe pod to see events
-kubectl describe pod <pod-name>
-
-# Check deployment status
-kubectl get deployment email-service
-
-# Check resource usage
-kubectl top pods -l app=email-service
-```
-
-## 7. Updating
-
-### Update SMTP Credentials
+### Update Frontend Code
 
 ```bash
-# Edit ConfigMap
-kubectl edit configmap email-service-config
-
-# Restart pods to apply changes
-kubectl rollout restart deployment email-service
-```
-
-### Update Email Service Code
-
-```bash
-cd backend
-make build-and-push
-kubectl rollout restart deployment email-service
-```
-
-### Update Frontend
-
-```bash
-# From project root
+# Build new image
 make build_docker_image
 make push_docker_image
-# Restart frontend pods if applicable
+
+# If using K8s, restart pods
+kubectl rollout restart deployment qa-cloud-portal
 ```
 
-## 8. Security Considerations
+## 9. Complete Deployment Checklist
 
-⚠️ **Important Security Notes**:
-
-1. **SMTP Credentials**: Currently stored in ConfigMap (plain text)
-   - For production, use Kubernetes Secrets
-   - Consider using secret management tools (Vault, Sealed Secrets)
-
-2. **CORS**: Currently set to `*` (allow all origins)
-   - Restrict to specific origins in production
-
-3. **Rate Limiting**: Service includes rate limiting (100 req/15min)
-   - Adjust in `backend/src/server.ts` if needed
-
-4. **TLS/HTTPS**:
-   - Email service uses TLS for SMTP (port 587)
-   - Consider adding HTTPS for the service endpoint
-
-## 9. Email Template
-
-The email service sends beautifully formatted HTML emails with:
-
-- Error title and category
-- Full error description
-- Metadata (timestamp, IP, user agent)
-- Professional styling with QA Cloud Portal branding
-
-Example email preview:
-```
-🚨 QA Cloud Portal - Error Report
-Category: Infrastructure
-
-Error Title: Database Connection Failed
-
-Error Description:
-Unable to connect to production database...
-
-Report Metadata:
-- Timestamp: 2025-11-20T12:34:56.789Z
-- Category: Infrastructure
-- IP Address: 10.160.24.100
-```
-
-## 10. API Reference
-
-### POST /send-error-report
-
-Send an error report via email.
-
-**Request**:
-```json
-{
-  "title": "Error title",
-  "content": "Detailed error description",
-  "category": "Emulator Cloud | Browser Cloud | Benchmark Automation | Infrastructure",
-  "recipient": "optional@email.com"  // Optional, defaults to ljiahao@fortinet.com
-}
-```
-
-**Response**:
-```json
-{
-  "success": true,
-  "message": "Error report sent successfully",
-  "messageId": "<unique-message-id>"
-}
-```
-
-### POST /send-test-email
-
-Send a test email to verify configuration.
-
-**Request**:
-```json
-{
-  "recipient": "test@example.com"
-}
-```
-
-**Response**:
-```json
-{
-  "success": true,
-  "message": "Test email sent successfully",
-  "messageId": "<unique-message-id>"
-}
-```
-
-## 11. Complete Deployment Checklist
-
+- [ ] Configure backend URLs in `src/config/config.ts`
 - [ ] Build frontend Docker image
-- [ ] Push frontend image to registry
-- [ ] Build email service Docker image
-- [ ] Push email service image to registry
-- [ ] Apply email service ConfigMap
-- [ ] Deploy email service
-- [ ] Verify email service pods are running
-- [ ] Test email service health endpoint
-- [ ] Send test email
-- [ ] Deploy frontend (if needed)
-- [ ] Test error reporting from frontend
-- [ ] Verify email received
-- [ ] Set up monitoring/logging
-- [ ] Document any custom configurations
+- [ ] Push image to registry
+- [ ] Deploy frontend (Docker or K8s)
+- [ ] Verify frontend is accessible
+- [ ] Test connectivity to backend services
+- [ ] Verify all features work correctly
+- [ ] Set up monitoring/logging (if needed)
 
-## 12. Quick Commands Reference
+## 10. Quick Commands Reference
 
 ```bash
-# Build everything
-cd backend && make build && cd ..
+# Build and push
 make build_docker_image
-
-# Push everything
-cd backend && make push && cd ..
 make push_docker_image
 
-# Deploy everything
-kubectl apply -f k8s/
+# Run locally
+npm start
 
-# Check status
-kubectl get pods,svc -l app=email-service
+# Build for production
+npm run build
 
-# View logs
-kubectl logs -l app=email-service -f --tail=50
+# Deploy to K8s (if applicable)
+kubectl apply -f k8s/frontend-deployment.yaml
 
-# Restart services
-kubectl rollout restart deployment email-service
+# Check status (K8s)
+kubectl get pods,svc -l app=qa-cloud-portal
 
-# Test email
-kubectl port-forward svc/email-service 8309:8309
-curl -X POST http://localhost:8309/send-test-email \
-  -H "Content-Type: application/json" \
-  -d '{"recipient":"your@email.com"}'
+# View logs (K8s)
+kubectl logs -l app=qa-cloud-portal -f --tail=50
+
+# Restart service (K8s)
+kubectl rollout restart deployment qa-cloud-portal
 ```
 
 ## Support
 
 For issues or questions:
-- Check logs: `kubectl logs -l app=email-service`
-- Review ConfigMap: `kubectl get configmap email-service-config -o yaml`
-- Test SMTP: Use `/ready` endpoint
+- Check browser console for errors
+- Verify backend service connectivity
 - Contact: ljiahao@fortinet.com
