@@ -77,26 +77,6 @@ const ResourcePage: React.FC<ResourcePageProps> = ({
 
   return (
     <div style={{ background: '#f4f6f8', minHeight: '100vh' }}>
-      {/* Hero Section */}
-      {!selectedResource && (
-        <div style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          padding: '60px 0',
-          marginBottom: '30px',
-          color: 'white',
-          textAlign: 'center'
-        }}>
-          <Container>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '15px' }}>
-              Emulator Cloud
-            </h1>
-            <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>
-              Manage Android and iOS emulators with remote VNC access and ADB integration
-            </p>
-          </Container>
-        </div>
-      )}
-
       <Container fluid style={{ padding: '24px' }}>
         {/* Only show buttons if no resource is selected */}
         {!selectedResource && (
