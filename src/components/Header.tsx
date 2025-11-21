@@ -52,37 +52,38 @@ const Header: React.FC<HeaderProps> = ({ nickname, resetNickname, handleNickname
   return (
     <Container fluid>
       <Row
-        className="text-white py-2 mb-2"
+        className="text-white py-1 mb-1"
         style={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          borderRadius: '0 0 8px 8px'
+          boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1)',
+          borderRadius: '0 0 4px 4px'
         }}
       >
-        <Col xs={8}>
-          <h1
+        <Col xs={8} className="d-flex align-items-center">
+          <span
             className="mb-0"
             style={{
-              fontWeight: '700',
-              fontSize: '1.25rem',
-              letterSpacing: '-0.5px',
-              textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+              fontWeight: '600',
+              fontSize: '0.9rem',
+              letterSpacing: '-0.3px'
             }}
           >
-            {title}
-          </h1>
+            {title} <span style={{ fontWeight: '400', fontSize: '0.75rem', opacity: 0.85 }}>· TaaS Cloud Portal</span>
+          </span>
         </Col>
         <Col xs={4} className="text-end d-flex align-items-center justify-content-end">
           {showLogin && (nickname ? (
             <Dropdown>
               <Dropdown.Toggle
                 variant="light"
+                size="sm"
                 style={{
                   fontWeight: '600',
-                  padding: '0.5rem 1.5rem',
-                  borderRadius: '8px',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '4px',
                   border: 'none',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)'
+                  fontSize: '0.8rem',
+                  boxShadow: '0 1px 4px rgba(0, 0, 0, 0.15)'
                 }}
               >
                 {nickname}
