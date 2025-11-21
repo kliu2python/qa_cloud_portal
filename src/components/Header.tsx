@@ -52,11 +52,11 @@ const Header: React.FC<HeaderProps> = ({ nickname, resetNickname, handleNickname
   return (
     <Container fluid>
       <Row
-        className="text-white py-4 mb-4"
+        className="text-white py-2 mb-2"
         style={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          borderRadius: '0 0 12px 12px'
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          borderRadius: '0 0 8px 8px'
         }}
       >
         <Col xs={8}>
@@ -64,7 +64,7 @@ const Header: React.FC<HeaderProps> = ({ nickname, resetNickname, handleNickname
             className="mb-0"
             style={{
               fontWeight: '700',
-              fontSize: '2rem',
+              fontSize: '1.25rem',
               letterSpacing: '-0.5px',
               textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
             }}
