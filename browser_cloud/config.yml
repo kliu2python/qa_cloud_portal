@@ -1,6 +1,0 @@
-grid_url: "http://10.160.24.88:4444"
-vnc_password: "secret"
-registration_secret: ""
-host: "0.0.0.0"
-port: 31590
-debug: false
