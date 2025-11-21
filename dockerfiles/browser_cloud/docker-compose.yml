@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  browser-cloud-api:
+    build:
+      context: ../../
+      dockerfile: dockerfiles/browser_cloud/api/Dockerfile
+    container_name: browser-cloud-api
+    ports:
+      - "31590:31590"
+    environment:
+      - GRID_URL=${GRID_URL:-http://10.160.24.88:4444}
+      - VNC_PASSWORD=${VNC_PASSWORD:-secret}
+      - REGISTRATION_SECRET=${REGISTRATION_SECRET:-}
+      - HOST=0.0.0.0
+      - PORT=31590
+      - DEBUG=${DEBUG:-false}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:31590/api/v1/browser_cloud/health').raise_for_status()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - browser-cloud
+
+networks:
+  browser-cloud:
+    driver: bridge
