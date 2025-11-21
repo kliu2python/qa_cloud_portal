@@ -128,7 +128,7 @@ const BrowserCloud: React.FC<BrowserCloudProps> = ({ nickName }) => {
                   }
                 >
                   <span style={{ cursor: 'help', color: '#4facfe', display: 'flex', alignItems: 'center' }}>
-                    <FaQuestionCircle size={18} />
+                    {FaQuestionCircle({ size: 18 })}
                   </span>
                 </OverlayTrigger>
               </div>
