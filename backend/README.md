@@ -1,14 +1,16 @@
-# QA Cloud Portal - Email Service
+# QA Cloud Portal - Unified Backend Service
 
-Backend service for sending error report emails from the QA Cloud Portal.
+Consolidated backend service for the QA Cloud Portal, providing Email service and Selenium Grid API endpoints.
 
 ## Features
 
 - ✉️ **Error Report Emails**: Send formatted error reports via Gmail SMTP
+- 🌐 **Selenium Grid API**: Proxy API for Selenium Grid status and session management
 - 🔒 **Secure**: Uses Helmet for security headers and rate limiting
 - 🎨 **HTML Templates**: Beautiful, responsive email templates
 - 📊 **Health Checks**: Kubernetes-ready health and readiness endpoints
 - 🔧 **ConfigMap Support**: Read credentials from Kubernetes ConfigMaps
+- 🎯 **Unified Service**: Single backend for all API needs
 
 ## Prerequisites
 
@@ -77,19 +79,25 @@ The service will start on port 8309 by default.
 
 ## API Endpoints
 
-### Health Check
+### Health & Status
+
+#### Health Check
 ```bash
 GET /health
 ```
 Returns service health status.
 
-### Readiness Check
+#### Readiness Check
 ```bash
 GET /ready
 ```
 Verifies SMTP connection and returns readiness status.
 
-### Send Error Report
+---
+
+### Email Service
+
+#### Send Error Report
 ```bash
 POST /send-error-report
 Content-Type: application/json
@@ -102,7 +110,16 @@ Content-Type: application/json
 }
 ```
 
-### Send Test Email
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Error report sent successfully",
+  "messageId": "<message-id>"
+}
+```
+
+#### Send Test Email
 ```bash
 POST /send-test-email
 Content-Type: application/json
@@ -112,18 +129,90 @@ Content-Type: application/json
 }
 ```
 
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Test email sent successfully",
+  "messageId": "<message-id>"
+}
+```
+
+---
+
+### Selenium Grid API
+
+#### Get Grid Status
+```bash
+GET /api/selenium-grid/status
+```
+
+Returns comprehensive Selenium Grid status including nodes, active sessions, and statistics.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "nodes": [...],
+    "sessions": [...],
+    "statistics": {
+      "totalNodes": 5,
+      "totalSlots": 20,
+      "activeSessions": 3,
+      "availableSlots": 17
+    },
+    "gridUrl": "http://10.160.24.88:4444",
+    "vncPassword": "secret"
+  }
+}
+```
+
+#### Delete Session
+```bash
+DELETE /api/selenium-grid/session/:sessionId
+```
+
+Terminates a specific Selenium session by ID.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Session abc123 deleted successfully"
+}
+```
+
+#### VNC WebSocket Proxy
+```bash
+GET /api/selenium-grid/session/:sessionId/se/vnc
+```
+
+WebSocket proxy for VNC connections (not yet implemented).
+
 ## Environment Variables
 
+### General
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `PORT` | Server port | `8309` |
+| `ALLOWED_ORIGINS` | CORS allowed origins (comma-separated) | `*` |
+
+### Email Service Configuration
+| Variable | Description | Default |
+|----------|-------------|---------|
 | `SMTP_HOST` | SMTP server hostname | `smtp.gmail.com` |
 | `SMTP_PORT` | SMTP server port | `587` |
 | `SMTP_SECURE` | Use TLS (true for 465) | `false` |
 | `SMTP_USER` | Gmail email address | *Required* |
 | `SMTP_PASS` | Gmail app password | *Required* |
 | `DEFAULT_RECIPIENT` | Default email recipient | `ljiahao@fortinet.com` |
-| `ALLOWED_ORIGINS` | CORS allowed origins | `*` |
+
+### Selenium Grid Configuration
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SELENIUM_GRID_URL` | Selenium Grid hub URL | `http://10.160.24.88:4444` |
+| `VNC_PASSWORD` | VNC password for remote viewing | `secret` |
 
 ## Gmail App Password Setup
 
@@ -134,6 +223,8 @@ Content-Type: application/json
 5. Use this password in `SMTP_PASS` environment variable
 
 ## Testing
+
+### Email Service Tests
 
 Test the email service locally:
 
@@ -153,18 +244,39 @@ curl -X POST http://localhost:8309/send-error-report \
   }'
 ```
 
+### Selenium Grid API Tests
+
+Test the Selenium Grid API:
+
+```bash
+# Check health
+curl http://localhost:8309/health
+
+# Get grid status
+curl http://localhost:8309/api/selenium-grid/status
+
+# Delete a session (replace with actual session ID)
+curl -X DELETE http://localhost:8309/api/selenium-grid/session/abc123
+```
+
 ## Project Structure
 
 ```
 backend/
 ├── src/
-│   ├── server.ts          # Express server and API routes
-│   └── emailService.ts    # Email sending logic with Nodemailer
-├── dist/                  # Compiled JavaScript (generated)
-├── package.json           # Dependencies
-├── tsconfig.json          # TypeScript configuration
-├── .env.example          # Environment template
-└── Dockerfile            # Docker build configuration
+│   ├── server.ts               # Unified Express server with all API routes
+│   │                           # - Email service endpoints
+│   │                           # - Selenium Grid proxy endpoints
+│   │                           # - Health/readiness checks
+│   ├── emailService.ts         # Email sending logic with Nodemailer
+│   └── selenium-grid-server.ts # [DEPRECATED] Standalone grid server (merged into server.ts)
+├── dist/                       # Compiled JavaScript (generated)
+├── package.json                # Dependencies
+├── tsconfig.json               # TypeScript configuration
+├── .env.example               # Environment template
+├── Dockerfile                 # Docker build configuration
+├── Makefile                   # Build and deployment automation
+└── README.md                  # This file
 ```
 
 ## Security Notes
