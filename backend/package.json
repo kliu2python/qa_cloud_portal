@@ -5,8 +5,10 @@
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
+    "start:grid": "node dist/selenium-grid-server.js",
     "build": "tsc",
     "dev": "ts-node src/server.ts",
+    "dev:grid": "ts-node src/selenium-grid-server.ts",
     "watch": "tsc -w"
   },
   "keywords": ["email", "smtp", "error-reporting"],
@@ -18,7 +20,8 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "helmet": "^7.1.0",
-    "express-rate-limit": "^7.1.5"
+    "express-rate-limit": "^7.1.5",
+    "axios": "^1.6.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
