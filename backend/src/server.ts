@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import axios from 'axios';
 import { EmailService, ErrorReportEmail } from './emailService';
 
 // Load environment variables
@@ -13,6 +14,10 @@ const SMTP_USER = process.env.SMTP_USER || '';
 const SMTP_PASS = process.env.SMTP_PASS || '';
 const DEFAULT_RECIPIENT = process.env.DEFAULT_RECIPIENT || 'ljiahao@fortinet.com';
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['*'];
+
+// Selenium Grid configuration
+const SELENIUM_GRID_URL = process.env.SELENIUM_GRID_URL || 'http://10.160.24.88:4444';
+const VNC_PASSWORD = process.env.VNC_PASSWORD || 'secret';
 
 // Validate required environment variables
 if (!SMTP_USER || !SMTP_PASS) {
@@ -190,6 +195,138 @@ app.post('/send-test-email', async (req: Request, res: Response) => {
   }
 });
 
+// ============================================================================
+// SELENIUM GRID API ENDPOINTS
+// ============================================================================
+
+// Grid status endpoint - Fetches status from Selenium Grid and transforms it
+app.get('/api/selenium-grid/status', async (req: Request, res: Response) => {
+  try {
+    console.log(`Fetching grid status from: ${SELENIUM_GRID_URL}/status`);
+
+    // Fetch status from Selenium Grid
+    const response = await axios.get(`${SELENIUM_GRID_URL}/status`, {
+      timeout: 5000
+    });
+
+    const gridStatus = response.data;
+
+    // Transform Selenium Grid status to our format
+    const nodes = gridStatus.value?.nodes || [];
+    const allSessions: any[] = [];
+
+    // Extract all active sessions from nodes
+    nodes.forEach((node: any) => {
+      if (node.slots) {
+        node.slots.forEach((slot: any) => {
+          if (slot.session) {
+            allSessions.push({
+              sessionId: slot.session.sessionId,
+              capabilities: slot.session.capabilities || slot.stereotype || {},
+              nodeId: node.id,
+              nodeUri: node.uri
+            });
+          }
+        });
+      }
+    });
+
+    // Calculate statistics
+    const totalNodes = nodes.length;
+    const totalSlots = nodes.reduce((sum: number, node: any) => sum + (node.slots?.length || 0), 0);
+    const activeSessions = allSessions.length;
+    const availableSlots = totalSlots - activeSessions;
+
+    // Transform nodes to our format
+    const transformedNodes = nodes.map((node: any) => ({
+      id: node.id,
+      uri: node.uri,
+      availability: node.availability || 'UNKNOWN',
+      slots: node.slots || []
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        nodes: transformedNodes,
+        sessions: allSessions,
+        statistics: {
+          totalNodes,
+          totalSlots,
+          activeSessions,
+          availableSlots
+        },
+        gridUrl: SELENIUM_GRID_URL,
+        vncPassword: VNC_PASSWORD
+      }
+    });
+  } catch (error: any) {
+    console.error('Error fetching grid status:', error.message);
+
+    // Return a friendly error response
+    if (error.code === 'ECONNREFUSED') {
+      res.status(503).json({
+        success: false,
+        error: `Cannot connect to Selenium Grid at ${SELENIUM_GRID_URL}. Please ensure the grid is running.`,
+        details: error.message
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to fetch grid status',
+        details: error.message
+      });
+    }
+  }
+});
+
+// Delete session endpoint - Kills a session on the grid
+app.delete('/api/selenium-grid/session/:sessionId', async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+    console.log(`Deleting session: ${sessionId}`);
+
+    // Send DELETE request to Selenium Grid
+    const response = await axios.delete(`${SELENIUM_GRID_URL}/session/${sessionId}`, {
+      timeout: 5000
+    });
+
+    res.json({
+      success: true,
+      message: `Session ${sessionId} deleted successfully`,
+      data: response.data
+    });
+  } catch (error: any) {
+    console.error('Error deleting session:', error.message);
+
+    if (error.response?.status === 404) {
+      res.status(404).json({
+        success: false,
+        error: 'Session not found'
+      });
+    } else if (error.code === 'ECONNREFUSED') {
+      res.status(503).json({
+        success: false,
+        error: `Cannot connect to Selenium Grid at ${SELENIUM_GRID_URL}`
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Failed to delete session',
+        details: error.message
+      });
+    }
+  }
+});
+
+// WebSocket proxy for VNC (if needed)
+app.get('/api/selenium-grid/session/:sessionId/se/vnc', (req: Request, res: Response) => {
+  res.status(501).json({
+    success: false,
+    error: 'VNC WebSocket proxy not yet implemented. Use direct connection to grid.'
+  });
+});
+
 // 404 handler
 app.use((req: Request, res: Response) => {
   res.status(404).json({
@@ -223,19 +360,34 @@ async function startServer() {
     app.listen(PORT, () => {
       console.log('');
       console.log('═══════════════════════════════════════════════════════════');
-      console.log('  QA Cloud Portal - Email Service');
+      console.log('  QA Cloud Portal - Unified Backend Service');
       console.log('═══════════════════════════════════════════════════════════');
       console.log(`  🚀 Server running on port ${PORT}`);
-      console.log(`  📧 SMTP Server: ${SMTP_HOST}:${SMTP_PORT}`);
-      console.log(`  📮 From Address: ${SMTP_USER}`);
-      console.log(`  📬 Default Recipient: ${DEFAULT_RECIPIENT}`);
-      console.log(`  🔒 SMTP Secure: ${SMTP_SECURE}`);
       console.log('');
-      console.log('  Endpoints:');
-      console.log(`    GET  /health              - Health check`);
-      console.log(`    GET  /ready               - Readiness check (SMTP verification)`);
-      console.log(`    POST /send-error-report   - Send error report email`);
-      console.log(`    POST /send-test-email     - Send test email`);
+      console.log('  📧 Email Service Configuration:');
+      console.log(`     SMTP Server: ${SMTP_HOST}:${SMTP_PORT}`);
+      console.log(`     From Address: ${SMTP_USER}`);
+      console.log(`     Default Recipient: ${DEFAULT_RECIPIENT}`);
+      console.log(`     SMTP Secure: ${SMTP_SECURE}`);
+      console.log('');
+      console.log('  🌐 Selenium Grid Configuration:');
+      console.log(`     Grid URL: ${SELENIUM_GRID_URL}`);
+      console.log(`     VNC Password: ${VNC_PASSWORD}`);
+      console.log('');
+      console.log('  API Endpoints:');
+      console.log('');
+      console.log('  Health & Status:');
+      console.log(`    GET  /health                                 - Health check`);
+      console.log(`    GET  /ready                                  - Readiness check (SMTP verification)`);
+      console.log('');
+      console.log('  Email Service:');
+      console.log(`    POST /send-error-report                      - Send error report email`);
+      console.log(`    POST /send-test-email                        - Send test email`);
+      console.log('');
+      console.log('  Selenium Grid:');
+      console.log(`    GET    /api/selenium-grid/status             - Get grid status`);
+      console.log(`    DELETE /api/selenium-grid/session/:sessionId - Delete session`);
+      console.log(`    GET    /api/selenium-grid/session/:id/se/vnc - VNC WebSocket (not implemented)`);
       console.log('═══════════════════════════════════════════════════════════');
       console.log('');
     });

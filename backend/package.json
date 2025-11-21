@@ -1,17 +1,15 @@
 {
-  "name": "qa-portal-email-service",
-  "version": "1.0.0",
-  "description": "Email service for QA Cloud Portal error reporting",
+  "name": "qa-portal-backend-service",
+  "version": "2.0.0",
+  "description": "Unified backend service for QA Cloud Portal - Email and Selenium Grid API",
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "start:grid": "node dist/selenium-grid-server.js",
     "build": "tsc",
     "dev": "ts-node src/server.ts",
-    "dev:grid": "ts-node src/selenium-grid-server.ts",
     "watch": "tsc -w"
   },
-  "keywords": ["email", "smtp", "error-reporting"],
+  "keywords": ["email", "smtp", "error-reporting", "selenium-grid", "automation"],
   "author": "QA Cloud Portal Team",
   "license": "MIT",
   "dependencies": {
