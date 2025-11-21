@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Container, Row, Table, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Container, Row, Table, Col, OverlayTrigger, Tooltip, Card } from 'react-bootstrap';
+import { FaQuestionCircle } from 'react-icons/fa';
 import SplitView from './SplitView';
 
 export interface Resource {
@@ -80,40 +81,81 @@ const ResourcePage: React.FC<ResourcePageProps> = ({
       <Container fluid style={{ padding: '24px' }}>
         {/* Only show buttons if no resource is selected */}
         {!selectedResource && (
-          <Row className="mb-4">
-            <Col>
-              <div className="d-flex gap-2">
-                <Button
-                  onClick={handleCreateNew}
-                  disabled={!nickName}
-                  style={{
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    border: 'none'
-                  }}
-                >
-                  Create New Resource
-                </Button>
-                <Button
-                  onClick={refreshPage}
-                  style={{
-                    background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                    border: 'none'
-                  }}
-                >
-                  Refresh
-                </Button>
-                <Button
-                  onClick={launchNFS}
-                  style={{
-                    background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                    border: 'none'
-                  }}
-                >
-                  NFS Location
-                </Button>
+          <Card style={{ marginBottom: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', border: 'none' }}>
+            <Card.Body>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <h3 style={{ margin: 0, color: '#0f172a' }}>Control Panel</h3>
+                  <OverlayTrigger
+                    placement="right"
+                    overlay={
+                      <Tooltip id="emulator-cloud-help">
+                        <div style={{ textAlign: 'left' }}>
+                          <strong>Emulator Cloud Service</strong>
+                          <hr style={{ margin: '8px 0', borderColor: 'rgba(255,255,255,0.3)' }} />
+                          <p style={{ margin: '4px 0' }}><strong>What it does:</strong></p>
+                          <p style={{ margin: '4px 0', fontSize: '13px' }}>
+                            Provides on-demand Android/iOS emulator instances with VNC viewing and ADB debugging capabilities
+                          </p>
+                          <p style={{ margin: '8px 0 4px 0' }}><strong>How to use:</strong></p>
+                          <ul style={{ margin: '4px 0', paddingLeft: '20px', fontSize: '13px' }}>
+                            <li>Click "Create New Resource" to provision a new emulator instance</li>
+                            <li>Use "Refresh" to update the resource status and availability</li>
+                            <li>Access "NFS Location" to upload/manage APK files</li>
+                            <li>Click "Launch" to open VNC viewer for visual interaction</li>
+                            <li>Use ADB port for programmatic device debugging</li>
+                            <li>Delete resources when testing is complete</li>
+                          </ul>
+                          <p style={{ margin: '8px 0 4px 0' }}><strong>What you get:</strong></p>
+                          <ul style={{ margin: '4px 0', paddingLeft: '20px', fontSize: '13px' }}>
+                            <li>Isolated Android/iOS emulator environments</li>
+                            <li>VNC remote desktop access for visual debugging</li>
+                            <li>ADB connectivity for automation and testing</li>
+                            <li>NFS file sharing for APK deployment</li>
+                            <li>Resource management and lifecycle control</li>
+                          </ul>
+                        </div>
+                      </Tooltip>
+                    }
+                  >
+                    <span style={{ cursor: 'help', color: '#4facfe', display: 'flex', alignItems: 'center' }}>
+                      <FaQuestionCircle size={18} />
+                    </span>
+                  </OverlayTrigger>
+                </div>
+                <div className="d-flex gap-2">
+                  <Button
+                    onClick={handleCreateNew}
+                    disabled={!nickName}
+                    style={{
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      border: 'none'
+                    }}
+                  >
+                    Create New Resource
+                  </Button>
+                  <Button
+                    onClick={refreshPage}
+                    style={{
+                      background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                      border: 'none'
+                    }}
+                  >
+                    Refresh
+                  </Button>
+                  <Button
+                    onClick={launchNFS}
+                    style={{
+                      background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                      border: 'none'
+                    }}
+                  >
+                    NFS Location
+                  </Button>
+                </div>
               </div>
-            </Col>
-          </Row>
+            </Card.Body>
+          </Card>
         )}
 
       {/* Show SplitView if a resource has been selected for VNC */}

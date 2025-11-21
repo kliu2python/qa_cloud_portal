@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Alert, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { FaQuestionCircle } from 'react-icons/fa';
 import VNCModal from './VNCModal';
 import config from '../config/config';
 import { GridData, GridStatusResponse, ActiveSession, GridNode } from '../types/gridTypes';
@@ -94,7 +95,43 @@ const BrowserCloud: React.FC<BrowserCloudProps> = ({ nickName }) => {
         <Card style={{ marginBottom: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', border: 'none' }}>
           <Card.Body>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, color: '#0f172a' }}>Control Panel</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <h3 style={{ margin: 0, color: '#0f172a' }}>Control Panel</h3>
+                <OverlayTrigger
+                  placement="right"
+                  overlay={
+                    <Tooltip id="browser-cloud-help">
+                      <div style={{ textAlign: 'left' }}>
+                        <strong>Browser Cloud Service</strong>
+                        <hr style={{ margin: '8px 0', borderColor: 'rgba(255,255,255,0.3)' }} />
+                        <p style={{ margin: '4px 0' }}><strong>What it does:</strong></p>
+                        <p style={{ margin: '4px 0', fontSize: '13px' }}>
+                          Provides on-demand Selenium Grid browser sessions with VNC remote viewing capabilities
+                        </p>
+                        <p style={{ margin: '8px 0 4px 0' }}><strong>How to use:</strong></p>
+                        <ul style={{ margin: '4px 0', paddingLeft: '20px', fontSize: '13px' }}>
+                          <li>View real-time statistics of active sessions and available slots</li>
+                          <li>Monitor and manage browser sessions across grid nodes</li>
+                          <li>Click "View" to access VNC viewer for live browser interaction</li>
+                          <li>Click "Kill" to terminate unwanted sessions</li>
+                          <li>Use auto-refresh to monitor sessions in real-time</li>
+                        </ul>
+                        <p style={{ margin: '8px 0 4px 0' }}><strong>What you get:</strong></p>
+                        <ul style={{ margin: '4px 0', paddingLeft: '20px', fontSize: '13px' }}>
+                          <li>Scalable browser testing infrastructure</li>
+                          <li>Visual debugging through VNC remote desktop</li>
+                          <li>Multi-browser support (Chrome, Firefox, Edge, etc.)</li>
+                          <li>Session management and monitoring dashboard</li>
+                        </ul>
+                      </div>
+                    </Tooltip>
+                  }
+                >
+                  <span style={{ cursor: 'help', color: '#4facfe', display: 'flex', alignItems: 'center' }}>
+                    <FaQuestionCircle size={18} />
+                  </span>
+                </OverlayTrigger>
+              </div>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <Button
                   style={{
