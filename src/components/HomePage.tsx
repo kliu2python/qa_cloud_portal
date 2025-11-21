@@ -137,31 +137,20 @@ const HomePage: React.FC<HomePageProps> = ({ nickName }) => {
 
   return (
     <div className="home-page">
-      {/* Hero Section */}
-      <div className="hero-section">
-        <Container>
-          <div className="hero-content">
-            <div className="hero-icon">
-              {React.createElement(FaRocket as React.FC)}
-            </div>
-            <h1 className="hero-title">
-              Welcome {un} to TaaS
-            </h1>
-            <p className="hero-subtitle">Test as a Service Platform</p>
-            <p className="hero-description">
-              {isLoggedIn
-                ? 'Your comprehensive testing platform with cloud emulators, automated CI/CD, and powerful analytics tools.'
-                : 'Please log in with your nickname to access the full suite of testing services and resources.'}
-            </p>
-            {!isLoggedIn && (
-              <div className="login-notice">
-                <span className="notice-icon">{React.createElement(FaCog as React.FC)}</span>
-                <span>No registration needed - just enter your nickname in the header to get started!</span>
-              </div>
-            )}
+      {/* Service Info Banner */}
+      <Container className="service-info-section">
+        <div className="service-info-banner">
+          <div className="service-info-icon">
+            {React.createElement(FaRocket as React.FC)}
           </div>
-        </Container>
-      </div>
+          <div className="service-info-content">
+            <h1 className="service-info-title">TaaS - Test as a Service</h1>
+            <p className="service-info-description">
+              Comprehensive testing platform with cloud emulators, automated CI/CD, and powerful analytics tools.
+            </p>
+          </div>
+        </div>
+      </Container>
 
       {/* Quick Actions Section */}
       {isLoggedIn && (

@@ -143,8 +143,8 @@ const App: React.FC = () => {
         {/* Sidebar */}
         <NavigateBar nickname={nickname} onLogout={resetNickname} />
         {/* Main Content */}
-        <div className="flex-grow-1">
-          <Container fluid>
+        <div className="flex-grow-1 d-flex justify-content-center">
+          <Container fluid style={{ maxWidth: '1400px' }}>
           <Routes>
             {/* Home Page */}
             <Route path="/" element={

@@ -22,20 +22,20 @@
 .sidebar-toggle {
   position: absolute;
   top: 20px;
-  right: -12px;
-  width: 24px;
-  height: 24px;
+  right: -20px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: #4f46e5;
   color: white;
-  border: 2px solid #1a1d29;
+  border: 3px solid #1a1d29;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
   z-index: 10;
-  font-size: 12px;
+  font-size: 18px;
   padding: 0;
 }
 
@@ -49,54 +49,10 @@
   transform: scale(0.95);
 }
 
-/* Header Section */
-.sidebar-header {
-  padding: 2rem 1.5rem 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 1rem;
-}
-
-.sidebar-brand {
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.brand-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: fadeIn 0.3s ease;
-}
-
-.brand-subtitle {
-  font-size: 0.875rem;
-  color: #a0aec0;
-  margin: 0.25rem 0 0;
-  font-weight: 400;
-  animation: fadeIn 0.3s ease 0.1s both;
-}
-
-.brand-title-collapsed {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: fadeIn 0.3s ease;
-}
-
 /* Navigation Section */
 .sidebar-nav {
   flex: 1;
-  padding: 0 0.75rem;
+  padding: 3rem 0.75rem 0;
   overflow-y: auto;
   overflow-x: hidden;
 }
