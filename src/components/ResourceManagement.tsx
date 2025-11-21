@@ -105,24 +105,6 @@ const ResourceManagement: React.FC<ResourceManageProps> = ({ nickName }) => {
 
   return (
     <div style={{ background: '#f4f6f8', minHeight: '100vh' }}>
-      {/* Hero Section */}
-      <div style={{
-        background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        padding: '60px 0',
-        marginBottom: '30px',
-        color: 'white',
-        textAlign: 'center'
-      }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '15px' }}>
-            Resource Dashboard
-          </h1>
-          <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>
-            Access comprehensive testing resources including device farms, servers, and analysis tools
-          </p>
-        </div>
-      </div>
-
       <div style={{ padding: '0 20px 40px', maxWidth: '1400px', margin: '0 auto' }}>
         <div style={{
           background: 'white',
