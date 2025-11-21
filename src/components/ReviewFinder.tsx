@@ -602,17 +602,6 @@ const ReviewFinder: React.FC = () => {
 
   return (
     <Container fluid className="review-finder-container">
-      {/* Header Section */}
-      <div className="review-finder-header">
-        <div className="header-content">
-          <FaSearch className="header-icon" />
-          <div>
-            <h1 className="header-title">FortiReviewFinder</h1>
-            <p className="header-subtitle">Aggregate and analyze app reviews from multiple platforms</p>
-          </div>
-        </div>
-      </div>
-
       {/* Search Form Section */}
       <Card className="search-form-card mb-4">
         <Card.Body>

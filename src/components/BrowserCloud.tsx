@@ -89,24 +89,6 @@ const BrowserCloud: React.FC<BrowserCloudProps> = ({ nickName }) => {
 
   return (
     <div style={{ background: '#f4f6f8', minHeight: '100vh' }}>
-      {/* Hero Section */}
-      <div style={{
-        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        padding: '60px 0',
-        marginBottom: '30px',
-        color: 'white',
-        textAlign: 'center'
-      }}>
-        <Container>
-          <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '15px' }}>
-            Browser Cloud
-          </h1>
-          <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>
-            Selenium Grid Manager - Real-time browser testing infrastructure
-          </p>
-        </Container>
-      </div>
-
       <Container fluid style={{ padding: '24px' }}>
         {/* Control Panel */}
         <Card style={{ marginBottom: '20px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', border: 'none' }}>

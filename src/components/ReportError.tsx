@@ -58,7 +58,6 @@ const ReportError: React.FC<ReportErrorProps> = ({
 
   return (
     <div className="container mt-4">
-      <h3 className="text-center mb-4">Report an Issue</h3>
       <form onSubmit={handleSubmit}>
         {/* Error Title */}
         <div className="mb-3">
