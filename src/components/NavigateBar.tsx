@@ -60,20 +60,6 @@ const NavigateBar: React.FC<NavigateBarProps> = ({ nickname, onLogout }) => {
         {isExpanded ? React.createElement(FaTimes as React.FC) : React.createElement(FaBars as React.FC)}
       </button>
 
-      {/* Header */}
-      <div className="sidebar-header">
-        <div className="sidebar-brand">
-          {isExpanded ? (
-            <>
-              <h3 className="brand-title">TaaS</h3>
-              <p className="brand-subtitle">Test as a Service</p>
-            </>
-          ) : (
-            <h3 className="brand-title-collapsed">T</h3>
-          )}
-        </div>
-      </div>
-
       {/* Navigation Items */}
       <nav className="sidebar-nav">
         {navItems.map((item) => {
