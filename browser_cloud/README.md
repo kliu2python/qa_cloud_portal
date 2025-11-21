@@ -37,6 +37,10 @@ A Flask-based microservice for managing Selenium Grid with VNC support.
 ### VNC Access
 - `WS /vnc/<session_id>` - WebSocket proxy for VNC connection
 
+### Compatibility Endpoints (for React Frontend)
+- `GET /api/status` - Simplified status endpoint for frontend
+- `DELETE /api/session/<session_id>` - Simplified session deletion
+
 ## Configuration
 
 Edit `browser_cloud/config.yml` to configure:
@@ -60,13 +64,35 @@ Or use environment variables:
 
 ## Running Locally
 
+### Backend (Flask API)
+
 ```bash
 cd browser_cloud
 pip install -r ../dockerfiles/browser_cloud/api/requirements.txt
+
+# Option 1: Run with default port (31590)
 python api.py
+
+# Option 2: Use the convenience script
+./run_local.sh
+
+# Option 3: Custom port
+PORT=8080 python api.py
 ```
 
-Then open http://localhost:5000 in your browser.
+The API will be available at http://localhost:31590 (or your custom port).
+
+### Frontend (React App)
+
+```bash
+# From the project root
+npm install
+npm start
+```
+
+The React app will run at http://localhost:3000 and automatically connect to the backend at http://localhost:31590.
+
+**Note**: The frontend config automatically detects development mode and uses `http://localhost:31590`. For production, it uses `http://10.160.24.88:31590`.
 
 ## Running with Docker
 
@@ -179,6 +205,31 @@ curl http://localhost:5000/api/v1/browser_cloud/status
 ```
 
 ## Troubleshooting
+
+### Frontend shows "Failed to fetch grid status" or 404 errors
+
+1. **Check the backend is running**:
+   ```bash
+   curl http://localhost:31590/api/status
+   ```
+   If this fails, the backend is not running. Start it with:
+   ```bash
+   cd browser_cloud && python api.py
+   ```
+
+2. **Check the frontend configuration**:
+   - The frontend automatically uses `http://localhost:31590` in development mode
+   - You can override this by creating `.env.development.local` in the project root:
+     ```
+     REACT_APP_SELENIUM_BACKEND_URL=http://localhost:31590
+     ```
+   - After changing environment variables, restart the React dev server
+
+3. **Port mismatch**: If you changed the Flask port, update the frontend config:
+   ```typescript
+   // src/config/config.ts
+   seleniumGridBackendUrl: 'http://localhost:YOUR_PORT'
+   ```
 
 ### Cannot connect to Selenium Grid
 
